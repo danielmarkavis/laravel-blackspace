@@ -1,5 +1,5 @@
-import { Astro } from './Astro.js';
-import { Functions } from './Functions.js';
+import {Astro} from './Astro.js';
+import {Functions} from './Functions.js';
 
 class Universe {
     constructor(width, height) {
@@ -8,56 +8,85 @@ class Universe {
         this.minBodies = 1;
         this.maxBodies = 10;
         this.maxOrbits = 20;
-        this.universeWidth = width || 1400;
-        this.universeHeight = height || 1000;
+        this.universeWidth = width || 1280;
+        this.universeHeight = height || 720;
         this.orbits = [];
         this.center = {
-            'x':this.universeWidth / 2,
-            'y':this.universeHeight / 2
+            'x': this.universeWidth / 2,
+            'y': this.universeHeight / 2
         };
     }
+
+    /**
+     *
+     */
     createBodies() {
-        for(let s = 1; s <= this.maxSolarSystems; s++) {
+        for (let s = 1; s <= this.maxSolarSystems; s++) {
             this.createSolarSystem(s);
         }
     }
+
+    /**
+     *
+     * @param systemID
+     */
     createSolarSystem(systemID) {
-        let star = new Astro('Star '+systemID );
+        let star = new Astro('Star ' + systemID);
         star.setAsStar();
-        star.vector.setVector(this.center);
+        star.vector.setVector(this.center.x, this.center.y);
         this.bodies.push(star); // Star
         this.createOrbits();
         for (let b = 1; b <= this.maxBodies; b++) {
             this.createPlanet(star, systemID);
         }
     }
-    createPlanet(star, systemID) {
-        let orbit = new Functions().rand(this.orbits.length);
-        this.removeOrbit(orbit);
 
-        let planet = new Astro('Planet '+Math.floor(Math.random() * 10000) + 1, orbit);
+    /**
+     *
+     * @param star
+     * @param systemID
+     */
+    createPlanet(star, systemID) {
+        let rand = new Functions().rand(this.orbits.length);
+        let orbit = this.orbits[rand];
+        this.removeOrbit(rand);
+
+        let planet = new Astro('Planet ' + (new Functions().rand(10000) + 1), orbit);
         planet.setAsPlanet();
         planet.setParent(systemID);
-        planet.vector.setVectorCoords(star.vector.x, star.vector.y);
+        planet.vector.setVector(star.vector.x, star.vector.y);
 
         this.bodies.push(planet); // Planets
     }
+
+    /**
+     *
+     */
     createOrbits() {
-        for(let i=0;i< this.maxOrbits;i++) {
+        this.orbits = [];
+        for (let i = 0; i < this.maxOrbits; i++) {
             this.orbits[i] = i+1;
         }
-        console.log(this.orbits);
     }
 
+    /**
+     *
+     * @param id
+     */
     removeOrbit(id) {
-        this.orbits.splice(id,1);
+        this.orbits.splice(id, 1);
     }
 
+    /**
+     *
+     * @param canvas
+     * @param time
+     */
     draw(canvas, time) {
-        this.bodies.forEach((body)=> {
+        this.bodies.forEach((body) => {
             body.draw(canvas, time);
         })
     }
 }
 
-export { Universe };
+export {Universe};

@@ -1,16 +1,11 @@
 class Vector {
     constructor(x, y) {
-        this.setVectorCoords(x, y);
+        this.setVector(x, y);
     }
 
-    setVectorCoords(x, y) {
+    setVector(x, y) {
         this.x = x || 0;
         this.y = y || 0;
-    }
-
-    setVector(coords) {
-        this.x = coords.x || 0;
-        this.y = coords.y || 0;
     }
 
     getDistance(destX, destY) {
@@ -28,6 +23,29 @@ class Vector {
         let nY = (cos * (this.y - cY)) - (sin * (this.x - cX)) + cY;
 
         return {'x': nX, 'y': nY};
+    }
+
+    fitToScreen(vector, distanceScale, zoom, resolution) {
+        console.log(resolution);
+        let center = {'x': Math.floor(resolution.width / 2), 'y': Math.floor(resolution.height / 2)};
+
+        let l = (((this.x * zoom) - (vector.x * zoom)) / distanceScale) + center.x;
+        let t = (((this.y * zoom) - (vector.y * zoom)) / distanceScale) + center.y;
+
+        return {'x': l, 'y': t}
+    }
+
+    moveLeft(value) {
+        this.x += value;
+    }
+    moveRight(value) {
+        this.x -= value;
+    }
+    moveUp(value) {
+        this.y += value;
+    }
+    moveDown(value) {
+        this.y -= value;
     }
 }
 
