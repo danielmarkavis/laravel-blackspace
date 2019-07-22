@@ -8,12 +8,13 @@ class Canvas {
         this.element = element;
         this.canvas = null;
         this.ctx = null;
-        this.resolution = {
-            width: resolution.width || 1280,
-            height: resolution.height || 720
+        this.width = resolution.width || 1280,
+        this.height = resolution.height || 720
+        this.center = {
+            x: Math.round(resolution.width / 2),
+            y: Math.round(resolution.height / 2)
         };
         this.layers = []; // Fleet lines -> planets -> ships
-//        this.zoom = 1;
     }
 
     clear() {
@@ -23,14 +24,13 @@ class Canvas {
     render() {
         this.canvas = document.getElementById(this.element);
         this.ctx = this.canvas.getContext("2d");
-        this.canvas.width = this.resolution.width;
-        this.canvas.height = this.resolution.height;
+        this.canvas.width = this.width;
+        this.canvas.height = this.height;
         this.clear();
     }
 
     fillRect(x,y,w,h,color) {
-        if (!this.ctx) {
-            console.log('Canvas not ready');
+        if (!this.isReady()) {
             return false;
         }
         this.ctx.fillStyle = color;
@@ -38,8 +38,7 @@ class Canvas {
     }
 
     drawCircle(x, y, radius, color) {
-        if (!this.ctx) {
-            console.log('Canvas not ready');
+        if (!this.isReady()) {
             return false;
         }
         this.ctx.fillStyle = color;
@@ -47,8 +46,25 @@ class Canvas {
         this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
         this.ctx.fill();
     }
+
+    drawLine(sx, sy, ex, ey, color) {
+        if (!this.isReady()) {
+            return false;
+        }
+        this.ctx.strokeStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(sx, sy);
+        this.ctx.lineTo(ex, ey);
+        this.ctx.stroke();
+    }
+
+    isReady() {
+        if (!this.ctx) {
+            console.log('Canvas not ready');
+            return false;
+        }
+        return true;
+    }
 }
 
-let screenCanvas = new Canvas("my-canvas", {width: 1280, height: 720});
-
-export { Canvas, screenCanvas };
+export { Canvas };

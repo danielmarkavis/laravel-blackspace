@@ -10,13 +10,16 @@
         <button @click="zoomIn">+</button>
         <button @click="zoomOut">-</button>
         <button @click="moveLeft"><<<</button>
+        <button @click="moveUp">^</button>
+        <button @click="moveDown">\/</button>
+        <button @click="moveRight">>>></button>
     </div>
 </template>
 
 <script>
     import {Canvas} from '../src/Canvas.js';
+    import {Camera} from '../src/Camera.js';
     import {Universe} from '../src/Universe.js';
-    import {playerCamera} from '../src/Camera.js';
 
     let time = 0;
 
@@ -26,6 +29,7 @@
         data() {
             return {
                 canvas: null,
+                camera: null,
                 layers: [],
                 time: 0,
                 ticker: null,
@@ -35,12 +39,8 @@
         },
         mounted() {
             this.setupCanvas();
-
-            this.layers['universe'] = new Universe((this.canvas.resolution.width * this.distanceScale), (this.canvas.resolution.height * this.distanceScale));
-            this.layers['universe'].createBodies();
-
-            // this.layers['fleets'] = new Fleets(this.canvas.canvasWidth * this.distanceScale, this.canvas.canvasHeight * this.distanceScale);
-            // this.layers['fleets'].createFleets();
+            this.setupCamera();
+            this.setupUniverse();
 
             this.render();
             this.auto();
@@ -49,6 +49,27 @@
             setupCanvas() {
                 this.canvas = new Canvas("my-canvas", {width: 1280, height: 720});
                 this.canvas.render();
+            },
+            setupCamera() {
+                this.camera = new Camera(this.canvas.center.x, this.canvas.center.y, 1);
+                this.camera.draw(this.canvas);
+            },
+            setupUniverse() {
+                this.layers['universe'] = new Universe(this.canvas.width, this.canvas.height, this.distanceScale);
+                this.layers['universe'].createBodies();
+            },
+            setupFleets() {
+                // this.layers['fleets'] = new Fleets(this.canvas.resolution, this.distanceScale);
+                // this.layers['fleets'].createFleets();
+            },
+            drawUniverse() {
+                this.layers['universe'].draw(this.canvas, this.camera, this.time);
+            },
+            drawFleets() {
+                this.layers['fleets'].draw(this.canvas, this.camera, this.time);
+            },
+            drawCamera() {
+                this.camera.draw(this.canvas);
             },
             tick() {
                 this.time++;
@@ -63,25 +84,35 @@
             },
             render() {
                 this.canvas.clear();
+                this.drawCamera();
                 // this.layers['fleets'].drawFleetLines(this.canvas, this.time);
-                this.layers['universe'].draw(this.canvas, this.time);
+                this.drawUniverse();
                 // this.layers['fleets'].drawFleets(this.canvas, this.time);
-                console.log(playerCamera);
-                playerCamera.draw();
             },
             zoomIn() {
-                playerCamera.zoomIn();
+                this.camera.zoomIn();
                 this.render();
             },
             zoomOut() {
-                playerCamera.zoomOut();
+                this.camera.zoomOut();
                 this.render();
             },
             moveLeft() {
-                playerCamera.moveLeft();
+                this.camera.moveLeft();
                 this.render();
             },
-
+            moveRight() {
+                this.camera.moveRight();
+                this.render();
+            },
+            moveUp() {
+                this.camera.moveUp();
+                this.render();
+            },
+            moveDown() {
+                this.camera.moveDown();
+                this.render();
+            },
         },
         watch: {
             'interval': function () {

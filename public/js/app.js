@@ -96,8 +96,11 @@
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _src_Canvas_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../src/Canvas.js */ "./resources/vuejs/src/Canvas.js");
-/* harmony import */ var _src_Universe_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../src/Universe.js */ "./resources/vuejs/src/Universe.js");
-/* harmony import */ var _src_Camera_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../src/Camera.js */ "./resources/vuejs/src/Camera.js");
+/* harmony import */ var _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../src/Camera.js */ "./resources/vuejs/src/Camera.js");
+/* harmony import */ var _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../src/Universe.js */ "./resources/vuejs/src/Universe.js");
+//
+//
+//
 //
 //
 //
@@ -123,6 +126,7 @@ var time = 0;
   data: function data() {
     return {
       canvas: null,
+      camera: null,
       layers: [],
       time: 0,
       ticker: null,
@@ -132,10 +136,8 @@ var time = 0;
   },
   mounted: function mounted() {
     this.setupCanvas();
-    this.layers['universe'] = new _src_Universe_js__WEBPACK_IMPORTED_MODULE_1__["Universe"](this.canvas.resolution.width * this.distanceScale, this.canvas.resolution.height * this.distanceScale);
-    this.layers['universe'].createBodies(); // this.layers['fleets'] = new Fleets(this.canvas.canvasWidth * this.distanceScale, this.canvas.canvasHeight * this.distanceScale);
-    // this.layers['fleets'].createFleets();
-
+    this.setupCamera();
+    this.setupUniverse();
     this.render();
     this.auto();
   },
@@ -146,6 +148,26 @@ var time = 0;
         height: 720
       });
       this.canvas.render();
+    },
+    setupCamera: function setupCamera() {
+      this.camera = new _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__["Camera"](this.canvas.center.x, this.canvas.center.y, 1);
+      this.camera.draw(this.canvas);
+    },
+    setupUniverse: function setupUniverse() {
+      this.layers['universe'] = new _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__["Universe"](this.canvas.width, this.canvas.height, this.distanceScale);
+      this.layers['universe'].createBodies();
+    },
+    setupFleets: function setupFleets() {// this.layers['fleets'] = new Fleets(this.canvas.resolution, this.distanceScale);
+      // this.layers['fleets'].createFleets();
+    },
+    drawUniverse: function drawUniverse() {
+      this.layers['universe'].draw(this.canvas, this.camera, this.time);
+    },
+    drawFleets: function drawFleets() {
+      this.layers['fleets'].draw(this.canvas, this.camera, this.time);
+    },
+    drawCamera: function drawCamera() {
+      this.camera.draw(this.canvas);
     },
     tick: function tick() {
       this.time++;
@@ -159,23 +181,33 @@ var time = 0;
       }.bind(this), this.interval);
     },
     render: function render() {
-      this.canvas.clear(); // this.layers['fleets'].drawFleetLines(this.canvas, this.time);
+      this.canvas.clear();
+      this.drawCamera(); // this.layers['fleets'].drawFleetLines(this.canvas, this.time);
 
-      this.layers['universe'].draw(this.canvas, this.time); // this.layers['fleets'].drawFleets(this.canvas, this.time);
-
-      console.log(_src_Camera_js__WEBPACK_IMPORTED_MODULE_2__["playerCamera"]);
-      _src_Camera_js__WEBPACK_IMPORTED_MODULE_2__["playerCamera"].draw();
+      this.drawUniverse(); // this.layers['fleets'].drawFleets(this.canvas, this.time);
     },
     zoomIn: function zoomIn() {
-      _src_Camera_js__WEBPACK_IMPORTED_MODULE_2__["playerCamera"].zoomIn();
+      this.camera.zoomIn();
       this.render();
     },
     zoomOut: function zoomOut() {
-      _src_Camera_js__WEBPACK_IMPORTED_MODULE_2__["playerCamera"].zoomOut();
+      this.camera.zoomOut();
       this.render();
     },
     moveLeft: function moveLeft() {
-      _src_Camera_js__WEBPACK_IMPORTED_MODULE_2__["playerCamera"].moveLeft();
+      this.camera.moveLeft();
+      this.render();
+    },
+    moveRight: function moveRight() {
+      this.camera.moveRight();
+      this.render();
+    },
+    moveUp: function moveUp() {
+      this.camera.moveUp();
+      this.render();
+    },
+    moveDown: function moveDown() {
+      this.camera.moveDown();
       this.render();
     }
   },
@@ -18414,7 +18446,13 @@ var render = function() {
     _vm._v(" "),
     _c("button", { on: { click: _vm.zoomOut } }, [_vm._v("-")]),
     _vm._v(" "),
-    _c("button", { on: { click: _vm.moveLeft } }, [_vm._v("<<<")])
+    _c("button", { on: { click: _vm.moveLeft } }, [_vm._v("<<<")]),
+    _vm._v(" "),
+    _c("button", { on: { click: _vm.moveUp } }, [_vm._v("^")]),
+    _vm._v(" "),
+    _c("button", { on: { click: _vm.moveDown } }, [_vm._v("\\/")]),
+    _vm._v(" "),
+    _c("button", { on: { click: _vm.moveRight } }, [_vm._v(">>>")])
   ])
 }
 var staticRenderFns = []
@@ -30636,8 +30674,6 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Astro", function() { return Astro; });
 /* harmony import */ var _Vector_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector.js */ "./resources/vuejs/src/Vector.js");
 /* harmony import */ var _Functions_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Functions.js */ "./resources/vuejs/src/Functions.js");
-/* harmony import */ var _Camera_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Camera.js */ "./resources/vuejs/src/Camera.js");
-/* harmony import */ var _Canvas_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./Canvas.js */ "./resources/vuejs/src/Canvas.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -30645,9 +30681,8 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 
-
-
-
+ // import {playerCamera} from './Camera.js';
+// import {screenCanvas} from './Canvas.js';
 
 var Astro =
 /*#__PURE__*/
@@ -30703,15 +30738,18 @@ function () {
     }
   }, {
     key: "draw",
-    value: function draw(canvas, time) {
+    value: function draw(canvas, camera, time) {
       var coords = this.move(time);
-      var color = this.type === 'star' ? 'yellow' : 'green'; // console.log(screenCanvas.resolution);
+      var color = this.type === 'star' ? 'yellow' : 'green'; // let newCoords = this.vector.fitToScreen(canvas, camera);
 
-      var newCoords = this.vector.fitToScreen(_Camera_js__WEBPACK_IMPORTED_MODULE_2__["playerCamera"].crosshair, _Camera_js__WEBPACK_IMPORTED_MODULE_2__["playerCamera"].distanceScale, _Camera_js__WEBPACK_IMPORTED_MODULE_2__["playerCamera"].zoom, _Canvas_js__WEBPACK_IMPORTED_MODULE_3__["screenCanvas"].resolution); // console.log(newCoords);
-      // console.log(playerCamera);
+      var vCoords = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](coords.x, coords.y);
+      var newCoords = vCoords.fitToScreen(canvas, camera); // console.log(newCoords.fitToScreen(canvas, camera));
+      // console.log(newCoords);
+      // canvas.drawCircle(coords.x, coords.y, this.radius, color);
 
-      canvas.drawCircle(coords.x, coords.y, this.radius, color);
-      canvas.drawCircle(newCoords.x, newCoords.y, this.radius, color);
+      if (camera.zoom > 3 && this.type === 'planet' || this.type === 'star') {
+        canvas.drawCircle(newCoords.x, newCoords.y, this.radius * (camera.zoom / 10), color);
+      }
     }
   }]);
 
@@ -30726,21 +30764,18 @@ function () {
 /*!***************************************!*\
   !*** ./resources/vuejs/src/Camera.js ***!
   \***************************************/
-/*! exports provided: Camera, playerCamera */
+/*! exports provided: Camera */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Camera", function() { return Camera; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "playerCamera", function() { return playerCamera; });
 /* harmony import */ var _Vector_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector.js */ "./resources/vuejs/src/Vector.js");
-/* harmony import */ var _Canvas_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Canvas.js */ "./resources/vuejs/src/Canvas.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 
 
 
@@ -30751,9 +30786,10 @@ function () {
     _classCallCheck(this, Camera);
 
     this.zoom = zoom;
-    this.distanceScale = 1;
+    this.distanceScale = 10;
     this.crosshair = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](x, y);
-    this.zoomStep = 1;
+    this.zoomStep = 2;
+    this.maxZoom = 2000;
     this.moveStep = 10;
     this.color = 'blue';
   }
@@ -30761,15 +30797,15 @@ function () {
   _createClass(Camera, [{
     key: "zoomIn",
     value: function zoomIn() {
-      if (this.zoom < 100) {
-        this.zoom++;
+      if (this.zoom < this.maxZoom) {
+        this.zoom = this.zoom * this.zoomStep;
       }
     }
   }, {
     key: "zoomOut",
     value: function zoomOut() {
       if (this.zoom > 1) {
-        this.zoom--;
+        this.zoom = Math.floor(this.zoom / this.zoomStep);
       }
     }
   }, {
@@ -30794,15 +30830,15 @@ function () {
     }
   }, {
     key: "draw",
-    value: function draw() {
-      _Canvas_js__WEBPACK_IMPORTED_MODULE_1__["screenCanvas"].drawCircle(this.crosshair.x, this.crosshair.y, 2, this.color);
+    value: function draw(canvas) {
+      canvas.drawLine(canvas.center.x, 0, canvas.center.x, canvas.center.y - 20, 'grey');
+      canvas.drawLine(canvas.center.x, canvas.center.y + 20, canvas.center.x, canvas.height, 'grey'); // canvas.drawCircle(canvas.center.x, canvas.center.y, 2, this.color);
     }
   }]);
 
   return Camera;
 }();
 
-var playerCamera = new Camera(800, 800, 1);
 
 
 /***/ }),
@@ -30811,13 +30847,12 @@ var playerCamera = new Camera(800, 800, 1);
 /*!***************************************!*\
   !*** ./resources/vuejs/src/Canvas.js ***!
   \***************************************/
-/*! exports provided: Canvas, screenCanvas */
+/*! exports provided: Canvas */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Canvas", function() { return Canvas; });
-/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "screenCanvas", function() { return screenCanvas; });
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -30838,12 +30873,12 @@ function () {
     this.element = element;
     this.canvas = null;
     this.ctx = null;
-    this.resolution = {
-      width: resolution.width || 1280,
-      height: resolution.height || 720
+    this.width = resolution.width || 1280, this.height = resolution.height || 720;
+    this.center = {
+      x: Math.round(resolution.width / 2),
+      y: Math.round(resolution.height / 2)
     };
     this.layers = []; // Fleet lines -> planets -> ships
-    //        this.zoom = 1;
   }
 
   _createClass(Canvas, [{
@@ -30856,15 +30891,14 @@ function () {
     value: function render() {
       this.canvas = document.getElementById(this.element);
       this.ctx = this.canvas.getContext("2d");
-      this.canvas.width = this.resolution.width;
-      this.canvas.height = this.resolution.height;
+      this.canvas.width = this.width;
+      this.canvas.height = this.height;
       this.clear();
     }
   }, {
     key: "fillRect",
     value: function fillRect(x, y, w, h, color) {
-      if (!this.ctx) {
-        console.log('Canvas not ready');
+      if (!this.isReady()) {
         return false;
       }
 
@@ -30874,8 +30908,7 @@ function () {
   }, {
     key: "drawCircle",
     value: function drawCircle(x, y, radius, color) {
-      if (!this.ctx) {
-        console.log('Canvas not ready');
+      if (!this.isReady()) {
         return false;
       }
 
@@ -30884,15 +30917,34 @@ function () {
       this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
       this.ctx.fill();
     }
+  }, {
+    key: "drawLine",
+    value: function drawLine(sx, sy, ex, ey, color) {
+      if (!this.isReady()) {
+        return false;
+      }
+
+      this.ctx.strokeStyle = color;
+      this.ctx.beginPath();
+      this.ctx.moveTo(sx, sy);
+      this.ctx.lineTo(ex, ey);
+      this.ctx.stroke();
+    }
+  }, {
+    key: "isReady",
+    value: function isReady() {
+      if (!this.ctx) {
+        console.log('Canvas not ready');
+        return false;
+      }
+
+      return true;
+    }
   }]);
 
   return Canvas;
 }();
 
-var screenCanvas = new Canvas("my-canvas", {
-  width: 1280,
-  height: 720
-});
 
 
 /***/ }),
@@ -30958,7 +31010,7 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var Universe =
 /*#__PURE__*/
 function () {
-  function Universe(width, height) {
+  function Universe(width, height, distanceScale) {
     _classCallCheck(this, Universe);
 
     this.bodies = [];
@@ -30966,12 +31018,12 @@ function () {
     this.minBodies = 1;
     this.maxBodies = 10;
     this.maxOrbits = 20;
-    this.universeWidth = width || 1280;
-    this.universeHeight = height || 720;
+    this.width = width * distanceScale || 1280;
+    this.height = height * distanceScale || 720;
     this.orbits = [];
     this.center = {
-      'x': this.universeWidth / 2,
-      'y': this.universeHeight / 2
+      'x': this.width / 2,
+      'y': this.height / 2
     };
   }
   /**
@@ -31049,14 +31101,15 @@ function () {
     /**
      *
      * @param canvas
+     * @param camera
      * @param time
      */
 
   }, {
     key: "draw",
-    value: function draw(canvas, time) {
+    value: function draw(canvas, camera, time) {
       this.bodies.forEach(function (body) {
-        body.draw(canvas, time);
+        body.draw(canvas, camera, time);
       });
     }
   }]);
@@ -31119,16 +31172,27 @@ function () {
         'y': nY
       };
     }
+    /**
+     * Convert Universe vector to Canvas vector.
+     *
+     * Offset Canvas by Camera vector.
+     * Increase distances of Body, based on zoom (x*zoom)
+     *
+     * @param canvas
+     * @param camera
+     * @returns {{x: number, y: number}}
+     */
+
   }, {
     key: "fitToScreen",
-    value: function fitToScreen(vector, distanceScale, zoom, resolution) {
-      console.log(resolution);
-      var center = {
-        'x': Math.floor(resolution.width / 2),
-        'y': Math.floor(resolution.height / 2)
-      };
+    value: function fitToScreen(canvas, camera) {
+      var center = canvas.center;
+      var zoom = camera.zoom;
+      var distanceScale = camera.distanceScale;
+      var vector = camera.crosshair;
       var l = (this.x * zoom - vector.x * zoom) / distanceScale + center.x;
-      var t = (this.y * zoom - vector.y * zoom) / distanceScale + center.y;
+      var t = (this.y * zoom - vector.y * zoom) / distanceScale + center.y; // console.log(vector.width);
+
       return {
         'x': l,
         'y': t
@@ -31137,22 +31201,22 @@ function () {
   }, {
     key: "moveLeft",
     value: function moveLeft(value) {
-      this.x += value;
+      this.x -= value;
     }
   }, {
     key: "moveRight",
     value: function moveRight(value) {
-      this.x -= value;
+      this.x += value;
     }
   }, {
     key: "moveUp",
     value: function moveUp(value) {
-      this.y += value;
+      this.y -= value;
     }
   }, {
     key: "moveDown",
     value: function moveDown(value) {
-      this.y -= value;
+      this.y += value;
     }
   }]);
 
@@ -31170,8 +31234,8 @@ function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
-module.exports = __webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
+module.exports = __webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

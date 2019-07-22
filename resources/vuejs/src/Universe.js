@@ -2,18 +2,18 @@ import {Astro} from './Astro.js';
 import {Functions} from './Functions.js';
 
 class Universe {
-    constructor(width, height) {
+    constructor(width, height, distanceScale) {
         this.bodies = [];
         this.maxSolarSystems = 1;
         this.minBodies = 1;
         this.maxBodies = 10;
         this.maxOrbits = 20;
-        this.universeWidth = width || 1280;
-        this.universeHeight = height || 720;
+        this.width = (width * distanceScale) || 1280;
+        this.height = (height * distanceScale) || 720;
         this.orbits = [];
         this.center = {
-            'x': this.universeWidth / 2,
-            'y': this.universeHeight / 2
+            'x': this.width / 2,
+            'y': this.height / 2
         };
     }
 
@@ -80,11 +80,12 @@ class Universe {
     /**
      *
      * @param canvas
+     * @param camera
      * @param time
      */
-    draw(canvas, time) {
+    draw(canvas, camera, time) {
         this.bodies.forEach((body) => {
-            body.draw(canvas, time);
+            body.draw(canvas, camera, time);
         })
     }
 }

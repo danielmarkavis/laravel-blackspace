@@ -1,7 +1,7 @@
 import {Vector} from './Vector.js';
 import {Functions} from './Functions.js';
-import {playerCamera} from './Camera.js';
-import {screenCanvas} from './Canvas.js';
+// import {playerCamera} from './Camera.js';
+// import {screenCanvas} from './Canvas.js';
 
 class Astro {
     constructor(name, orbit) {
@@ -43,15 +43,22 @@ class Astro {
         return newCoords;
     }
 
-    draw(canvas, time) {
+    draw(canvas, camera, time) {
         let coords = this.move(time);
         let color = (this.type === 'star') ? 'yellow' : 'green';
-        // console.log(screenCanvas.resolution);
-        let newCoords = this.vector.fitToScreen(playerCamera.crosshair, playerCamera.distanceScale, playerCamera.zoom, screenCanvas.resolution);
+
+        // let newCoords = this.vector.fitToScreen(canvas, camera);
+        let vCoords = new Vector(coords.x, coords.y);
+        let newCoords = vCoords.fitToScreen(canvas, camera);
+        // console.log(newCoords.fitToScreen(canvas, camera));
+
         // console.log(newCoords);
-        // console.log(playerCamera);
-        canvas.drawCircle(coords.x, coords.y, this.radius, color);
-        canvas.drawCircle(newCoords.x, newCoords.y, this.radius, color);
+
+        // canvas.drawCircle(coords.x, coords.y, this.radius, color);
+
+        if ((camera.zoom > 3 && this.type === 'planet') || this.type === 'star')  {
+            canvas.drawCircle(newCoords.x, newCoords.y, this.radius*(camera.zoom/10), color);
+        }
     }
 }
 

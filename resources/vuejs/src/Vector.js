@@ -25,27 +25,39 @@ class Vector {
         return {'x': nX, 'y': nY};
     }
 
-    fitToScreen(vector, distanceScale, zoom, resolution) {
-        console.log(resolution);
-        let center = {'x': Math.floor(resolution.width / 2), 'y': Math.floor(resolution.height / 2)};
+    /**
+     * Convert Universe vector to Canvas vector.
+     *
+     * Offset Canvas by Camera vector.
+     * Increase distances of Body, based on zoom (x*zoom)
+     *
+     * @param canvas
+     * @param camera
+     * @returns {{x: number, y: number}}
+     */
+    fitToScreen(canvas, camera) {
+        let center = canvas.center;
+        let zoom = camera.zoom;
+        let distanceScale = camera.distanceScale;
+        let vector = camera.crosshair;
 
         let l = (((this.x * zoom) - (vector.x * zoom)) / distanceScale) + center.x;
         let t = (((this.y * zoom) - (vector.y * zoom)) / distanceScale) + center.y;
-
+        // console.log(vector.width);
         return {'x': l, 'y': t}
     }
 
     moveLeft(value) {
-        this.x += value;
-    }
-    moveRight(value) {
         this.x -= value;
     }
+    moveRight(value) {
+        this.x += value;
+    }
     moveUp(value) {
-        this.y += value;
+        this.y -= value;
     }
     moveDown(value) {
-        this.y -= value;
+        this.y += value;
     }
 }
 
