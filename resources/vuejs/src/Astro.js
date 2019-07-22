@@ -1,7 +1,5 @@
 import {Vector} from './Vector.js';
 import {Functions} from './Functions.js';
-// import {playerCamera} from './Camera.js';
-// import {screenCanvas} from './Canvas.js';
 
 class Astro {
     constructor(name, orbit) {
@@ -19,7 +17,11 @@ class Astro {
         this.radius = 5;
 
         this.orbit.distance = 7 * ((this.orbit.path + 1) * 2);
-        this.orbit.speed = Math.floor(30 / this.orbit.path) + 1 + (new Functions().rand(3));
+        if (new Functions().rand(100)===1) {
+            this.orbit.speed = Math.floor(30 / this.orbit.path) + 1 + (new Functions().rand(3));
+        } else {
+            this.orbit.speed = -(Math.floor(30 / this.orbit.path) + 1 + (new Functions().rand(3)));
+        }
     }
 
     setAsStar() {
@@ -47,19 +49,14 @@ class Astro {
         let coords = this.move(time);
         let color = (this.type === 'star') ? 'yellow' : 'green';
 
-        // let newCoords = this.vector.fitToScreen(canvas, camera);
-        let vCoords = new Vector(coords.x, coords.y);
-        let newCoords = vCoords.fitToScreen(canvas, camera);
-        // console.log(newCoords.fitToScreen(canvas, camera));
+        let astroCoords = new Vector(coords.x, coords.y);
+        let canvasCoords = astroCoords.fitToScreen(canvas, camera);
 
-        // console.log(newCoords);
+        if ((camera.zoom > (2*camera.distanceScale) && this.type === 'planet') || this.type === 'star')  {
+            // canvas.drawCircle(newCoords.x, newCoords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
 
-        // canvas.drawCircle(coords.x, coords.y, this.radius, color);
-
-        if ((camera.zoom > 3 && this.type === 'planet') || this.type === 'star')  {
-            canvas.drawCircle(newCoords.x, newCoords.y, this.radius*(camera.zoom/10), color);
+            canvas.drawCircle(canvasCoords.x-canvas.center.x, canvasCoords.y-canvas.center.y, this.radius*(camera.zoom/10), color);
         }
-    }
-}
+    }}
 
 export {Astro};

@@ -37,14 +37,20 @@ class Canvas {
         this.ctx.fillRect(x,y,w,h);
     }
 
-    drawCircle(x, y, radius, color) {
+    drawCircle(x, y, radius, fill, stroke) {
         if (!this.isReady()) {
             return false;
         }
-        this.ctx.fillStyle = color;
+        this.ctx.fillStyle = fill;
+        this.ctx.strokeStyle = stroke;
         this.ctx.beginPath();
         this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
         this.ctx.fill();
+        if (stroke) {
+            this.ctx.lineWidth = 1;
+            this.ctx.strokeStyle = stroke;
+            this.ctx.stroke();
+        }
     }
 
     drawLine(sx, sy, ex, ey, color) {

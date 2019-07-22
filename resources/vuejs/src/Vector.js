@@ -43,7 +43,7 @@ class Vector {
 
         let l = (((this.x * zoom) - (vector.x * zoom)) / distanceScale) + center.x;
         let t = (((this.y * zoom) - (vector.y * zoom)) / distanceScale) + center.y;
-        // console.log(vector.width);
+
         return {'x': l, 'y': t}
     }
 

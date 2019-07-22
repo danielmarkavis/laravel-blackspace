@@ -4,11 +4,11 @@ class Camera {
 
     constructor(x, y, zoom) {
         this.zoom = zoom;
-        this.distanceScale = 10;
+        this.distanceScale = 100;
         this.crosshair = new Vector(x, y);
         this.zoomStep = 2;
         this.maxZoom = 2000;
-        this.moveStep = 10;
+        this.moveStep = 200 * this.distanceScale;
         this.color = 'blue';
     }
 

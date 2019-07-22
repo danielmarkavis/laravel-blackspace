@@ -116,6 +116,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 
 
@@ -127,7 +128,8 @@ var time = 0;
     return {
       canvas: null,
       camera: null,
-      layers: [],
+      universe: [],
+      fleets: [],
       time: 0,
       ticker: null,
       paused: true,
@@ -151,20 +153,21 @@ var time = 0;
     },
     setupCamera: function setupCamera() {
       this.camera = new _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__["Camera"](this.canvas.center.x, this.canvas.center.y, 1);
+      this.camera.distanceScale = 10000;
       this.camera.draw(this.canvas);
     },
     setupUniverse: function setupUniverse() {
-      this.layers['universe'] = new _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__["Universe"](this.canvas.width, this.canvas.height, this.distanceScale);
-      this.layers['universe'].createBodies();
+      this.universe = new _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__["Universe"](this.canvas.width, this.canvas.height, this.camera.distanceScale);
+      this.universe.createBodies();
     },
     setupFleets: function setupFleets() {// this.layers['fleets'] = new Fleets(this.canvas.resolution, this.distanceScale);
       // this.layers['fleets'].createFleets();
     },
     drawUniverse: function drawUniverse() {
-      this.layers['universe'].draw(this.canvas, this.camera, this.time);
+      this.universe.draw(this.canvas, this.camera, this.time);
     },
     drawFleets: function drawFleets() {
-      this.layers['fleets'].draw(this.canvas, this.camera, this.time);
+      this.fleets.draw(this.canvas, this.camera, this.time);
     },
     drawCamera: function drawCamera() {
       this.camera.draw(this.canvas);
@@ -208,6 +211,13 @@ var time = 0;
     },
     moveDown: function moveDown() {
       this.camera.moveDown();
+      this.render();
+    },
+    centerPlanet: function centerPlanet() {
+      var system = this.universe.getAstro(0);
+      var systemVector = system.vector.fitToScreen(this.canvas, this.camera);
+      this.camera.crosshair.x = Math.floor(systemVector.x);
+      this.camera.crosshair.y = Math.floor(systemVector.y);
       this.render();
     }
   },
@@ -18435,7 +18445,7 @@ var render = function() {
       {
         on: {
           click: function($event) {
-            _vm.interval = 5
+            _vm.interval = 30
           }
         }
       },
@@ -18452,7 +18462,9 @@ var render = function() {
     _vm._v(" "),
     _c("button", { on: { click: _vm.moveDown } }, [_vm._v("\\/")]),
     _vm._v(" "),
-    _c("button", { on: { click: _vm.moveRight } }, [_vm._v(">>>")])
+    _c("button", { on: { click: _vm.moveRight } }, [_vm._v(">>>")]),
+    _vm._v(" "),
+    _c("button", { on: { click: _vm.centerPlanet } }, [_vm._v(">>>")])
   ])
 }
 var staticRenderFns = []
@@ -30681,8 +30693,7 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
 
- // import {playerCamera} from './Camera.js';
-// import {screenCanvas} from './Canvas.js';
+
 
 var Astro =
 /*#__PURE__*/
@@ -30706,7 +30717,12 @@ function () {
     this.type = null;
     this.radius = 5;
     this.orbit.distance = 7 * ((this.orbit.path + 1) * 2);
-    this.orbit.speed = Math.floor(30 / this.orbit.path) + 1 + new _Functions_js__WEBPACK_IMPORTED_MODULE_1__["Functions"]().rand(3);
+
+    if (new _Functions_js__WEBPACK_IMPORTED_MODULE_1__["Functions"]().rand(100) === 1) {
+      this.orbit.speed = Math.floor(30 / this.orbit.path) + 1 + new _Functions_js__WEBPACK_IMPORTED_MODULE_1__["Functions"]().rand(3);
+    } else {
+      this.orbit.speed = -(Math.floor(30 / this.orbit.path) + 1 + new _Functions_js__WEBPACK_IMPORTED_MODULE_1__["Functions"]().rand(3));
+    }
   }
 
   _createClass(Astro, [{
@@ -30740,15 +30756,13 @@ function () {
     key: "draw",
     value: function draw(canvas, camera, time) {
       var coords = this.move(time);
-      var color = this.type === 'star' ? 'yellow' : 'green'; // let newCoords = this.vector.fitToScreen(canvas, camera);
+      var color = this.type === 'star' ? 'yellow' : 'green';
+      var astroCoords = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](coords.x, coords.y);
+      var canvasCoords = astroCoords.fitToScreen(canvas, camera);
 
-      var vCoords = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](coords.x, coords.y);
-      var newCoords = vCoords.fitToScreen(canvas, camera); // console.log(newCoords.fitToScreen(canvas, camera));
-      // console.log(newCoords);
-      // canvas.drawCircle(coords.x, coords.y, this.radius, color);
-
-      if (camera.zoom > 3 && this.type === 'planet' || this.type === 'star') {
-        canvas.drawCircle(newCoords.x, newCoords.y, this.radius * (camera.zoom / 10), color);
+      if (camera.zoom > 2 * camera.distanceScale && this.type === 'planet' || this.type === 'star') {
+        // canvas.drawCircle(newCoords.x, newCoords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
+        canvas.drawCircle(canvasCoords.x - canvas.center.x, canvasCoords.y - canvas.center.y, this.radius * (camera.zoom / 10), color);
       }
     }
   }]);
@@ -30786,11 +30800,11 @@ function () {
     _classCallCheck(this, Camera);
 
     this.zoom = zoom;
-    this.distanceScale = 10;
+    this.distanceScale = 100;
     this.crosshair = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](x, y);
     this.zoomStep = 2;
     this.maxZoom = 2000;
-    this.moveStep = 10;
+    this.moveStep = 200 * this.distanceScale;
     this.color = 'blue';
   }
 
@@ -30907,15 +30921,22 @@ function () {
     }
   }, {
     key: "drawCircle",
-    value: function drawCircle(x, y, radius, color) {
+    value: function drawCircle(x, y, radius, fill, stroke) {
       if (!this.isReady()) {
         return false;
       }
 
-      this.ctx.fillStyle = color;
+      this.ctx.fillStyle = fill;
+      this.ctx.strokeStyle = stroke;
       this.ctx.beginPath();
       this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
       this.ctx.fill();
+
+      if (stroke) {
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = stroke;
+        this.ctx.stroke();
+      }
     }
   }, {
     key: "drawLine",
@@ -31014,9 +31035,9 @@ function () {
     _classCallCheck(this, Universe);
 
     this.bodies = [];
-    this.maxSolarSystems = 1;
+    this.maxSolarSystems = 200;
     this.minBodies = 1;
-    this.maxBodies = 10;
+    this.maxBodies = 3;
     this.maxOrbits = 20;
     this.width = width * distanceScale || 1280;
     this.height = height * distanceScale || 720;
@@ -31025,6 +31046,7 @@ function () {
       'x': this.width / 2,
       'y': this.height / 2
     };
+    console.log(this.width);
   }
   /**
    *
@@ -31048,7 +31070,9 @@ function () {
     value: function createSolarSystem(systemID) {
       var star = new _Astro_js__WEBPACK_IMPORTED_MODULE_0__["Astro"]('Star ' + systemID);
       star.setAsStar();
-      star.vector.setVector(this.center.x, this.center.y);
+      var fn = new _Functions_js__WEBPACK_IMPORTED_MODULE_1__["Functions"](); // star.vector.setVector(this.center.x, this.center.y);
+
+      star.vector.setVector(fn.rand(this.width), fn.rand(this.height));
       this.bodies.push(star); // Star
 
       this.createOrbits();
@@ -31097,6 +31121,11 @@ function () {
     key: "removeOrbit",
     value: function removeOrbit(id) {
       this.orbits.splice(id, 1);
+    }
+  }, {
+    key: "getAstro",
+    value: function getAstro(id) {
+      return this.bodies[id];
     }
     /**
      *
@@ -31191,8 +31220,7 @@ function () {
       var distanceScale = camera.distanceScale;
       var vector = camera.crosshair;
       var l = (this.x * zoom - vector.x * zoom) / distanceScale + center.x;
-      var t = (this.y * zoom - vector.y * zoom) / distanceScale + center.y; // console.log(vector.width);
-
+      var t = (this.y * zoom - vector.y * zoom) / distanceScale + center.y;
       return {
         'x': l,
         'y': t
@@ -31234,8 +31262,8 @@ function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
-module.exports = __webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
+module.exports = __webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

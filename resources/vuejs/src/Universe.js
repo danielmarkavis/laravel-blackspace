@@ -4,9 +4,9 @@ import {Functions} from './Functions.js';
 class Universe {
     constructor(width, height, distanceScale) {
         this.bodies = [];
-        this.maxSolarSystems = 1;
+        this.maxSolarSystems = 200;
         this.minBodies = 1;
-        this.maxBodies = 10;
+        this.maxBodies = 3;
         this.maxOrbits = 20;
         this.width = (width * distanceScale) || 1280;
         this.height = (height * distanceScale) || 720;
@@ -15,6 +15,7 @@ class Universe {
             'x': this.width / 2,
             'y': this.height / 2
         };
+        console.log(this.width);
     }
 
     /**
@@ -33,7 +34,9 @@ class Universe {
     createSolarSystem(systemID) {
         let star = new Astro('Star ' + systemID);
         star.setAsStar();
-        star.vector.setVector(this.center.x, this.center.y);
+        let fn = new Functions();
+        // star.vector.setVector(this.center.x, this.center.y);
+        star.vector.setVector(fn.rand(this.width), fn.rand(this.height));
         this.bodies.push(star); // Star
         this.createOrbits();
         for (let b = 1; b <= this.maxBodies; b++) {
@@ -75,6 +78,10 @@ class Universe {
      */
     removeOrbit(id) {
         this.orbits.splice(id, 1);
+    }
+
+    getAstro(id) {
+        return this.bodies[id];
     }
 
     /**
