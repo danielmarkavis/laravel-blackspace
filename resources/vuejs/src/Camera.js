@@ -8,7 +8,7 @@ class Camera {
         this.crosshair = new Vector(x, y);
         this.zoomStep = 2;
         this.maxZoom = 2000;
-        this.moveStep = 200 * this.distanceScale;
+        this.moveStep = 100; // TODO: This needs to be relative to the zoom and universe scale
         this.color = 'blue';
     }
 

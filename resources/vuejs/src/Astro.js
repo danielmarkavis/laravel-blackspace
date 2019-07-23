@@ -14,7 +14,7 @@ class Astro {
         };
         this.vector = new Vector();
         this.type = null;
-        this.radius = 5;
+        this.radius = 3;
 
         this.orbit.distance = 7 * ((this.orbit.path + 1) * 2);
         if (new Functions().rand(100)===1) {
@@ -45,6 +45,13 @@ class Astro {
         return newCoords;
     }
 
+    /**
+     * Will account for canvas size vs universe size
+     *
+     * @param canvas
+     * @param camera
+     * @param time
+     */
     draw(canvas, camera, time) {
         let coords = this.move(time);
         let color = (this.type === 'star') ? 'yellow' : 'green';
@@ -52,11 +59,11 @@ class Astro {
         let astroCoords = new Vector(coords.x, coords.y);
         let canvasCoords = astroCoords.fitToScreen(canvas, camera);
 
-        if ((camera.zoom > (2*camera.distanceScale) && this.type === 'planet') || this.type === 'star')  {
+        // if ((camera.zoom > (2*camera.distanceScale) && this.type === 'planet') || this.type === 'star')  {
             // canvas.drawCircle(newCoords.x, newCoords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
 
-            canvas.drawCircle(canvasCoords.x-canvas.center.x, canvasCoords.y-canvas.center.y, this.radius*(camera.zoom/10), color);
-        }
+            canvas.drawCircle(canvasCoords.x, canvasCoords.y, this.radius, color);
+        // }
     }}
 
 export {Astro};

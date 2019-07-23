@@ -185,9 +185,9 @@ var time = 0;
     },
     render: function render() {
       this.canvas.clear();
-      this.drawCamera(); // this.layers['fleets'].drawFleetLines(this.canvas, this.time);
+      this.drawCamera(); // this.drawFleetLines();
 
-      this.drawUniverse(); // this.layers['fleets'].drawFleets(this.canvas, this.time);
+      this.drawUniverse(); // this.drawFleets();
     },
     zoomIn: function zoomIn() {
       this.camera.zoomIn();
@@ -30715,7 +30715,7 @@ function () {
     };
     this.vector = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"]();
     this.type = null;
-    this.radius = 5;
+    this.radius = 3;
     this.orbit.distance = 7 * ((this.orbit.path + 1) * 2);
 
     if (new _Functions_js__WEBPACK_IMPORTED_MODULE_1__["Functions"]().rand(100) === 1) {
@@ -30752,18 +30752,24 @@ function () {
 
       return newCoords;
     }
+    /**
+     * Will account for canvas size vs universe size
+     *
+     * @param canvas
+     * @param camera
+     * @param time
+     */
+
   }, {
     key: "draw",
     value: function draw(canvas, camera, time) {
       var coords = this.move(time);
       var color = this.type === 'star' ? 'yellow' : 'green';
       var astroCoords = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](coords.x, coords.y);
-      var canvasCoords = astroCoords.fitToScreen(canvas, camera);
+      var canvasCoords = astroCoords.fitToScreen(canvas, camera); // if ((camera.zoom > (2*camera.distanceScale) && this.type === 'planet') || this.type === 'star')  {
+      // canvas.drawCircle(newCoords.x, newCoords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
 
-      if (camera.zoom > 2 * camera.distanceScale && this.type === 'planet' || this.type === 'star') {
-        // canvas.drawCircle(newCoords.x, newCoords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
-        canvas.drawCircle(canvasCoords.x - canvas.center.x, canvasCoords.y - canvas.center.y, this.radius * (camera.zoom / 10), color);
-      }
+      canvas.drawCircle(canvasCoords.x, canvasCoords.y, this.radius, color); // }
     }
   }]);
 
@@ -30804,7 +30810,8 @@ function () {
     this.crosshair = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](x, y);
     this.zoomStep = 2;
     this.maxZoom = 2000;
-    this.moveStep = 200 * this.distanceScale;
+    this.moveStep = 100; // TODO: This needs to be relative to the zoom and universe scale
+
     this.color = 'blue';
   }
 
@@ -31262,8 +31269,8 @@ function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
-module.exports = __webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
+module.exports = __webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

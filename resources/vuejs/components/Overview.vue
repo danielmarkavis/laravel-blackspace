@@ -88,9 +88,9 @@
             render() {
                 this.canvas.clear();
                 this.drawCamera();
-                // this.layers['fleets'].drawFleetLines(this.canvas, this.time);
+                // this.drawFleetLines();
                 this.drawUniverse();
-                // this.layers['fleets'].drawFleets(this.canvas, this.time);
+                // this.drawFleets();
             },
             zoomIn() {
                 this.camera.zoomIn();
