@@ -2,14 +2,22 @@ import {Vector} from './Vector.js';
 
 class Camera {
 
-    constructor(x, y, zoom) {
-        this.zoom = zoom;
-        this.distanceScale = 100;
-        this.crosshair = new Vector(x, y);
+    constructor() {
+        this.zoom = 1;
+        this.distanceScale = 10000;
+        this.vector = new Vector(0, 0);
         this.zoomStep = 2;
-        this.maxZoom = 2000;
+        this.maxZoom = 10000;
         this.moveStep = 200 * this.distanceScale;
         this.color = 'blue';
+    }
+
+    setZoom(zoom) {
+        this.zoom = zoom;
+    }
+
+    setVector(x,y) {
+        this.vector.setVector(x,y);
     }
 
     zoomIn() {
@@ -25,19 +33,19 @@ class Camera {
     }
 
     moveLeft() {
-        this.crosshair.moveLeft(this.moveStep);
+        this.vector.moveLeft(this.moveStep);
     }
 
     moveRight() {
-        this.crosshair.moveRight(this.moveStep);
+        this.vector.moveRight(this.moveStep);
     }
 
     moveUp() {
-        this.crosshair.moveUp(this.moveStep);
+        this.vector.moveUp(this.moveStep);
     }
 
     moveDown() {
-        this.crosshair.moveDown(this.moveStep);
+        this.vector.moveDown(this.moveStep);
     }
 
     draw(canvas) {

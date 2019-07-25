@@ -1,4 +1,9 @@
 class Vector {
+    /**
+     *
+     * @param x
+     * @param y
+     */
     constructor(x, y) {
         this.setVector(x, y);
     }
@@ -39,7 +44,7 @@ class Vector {
         let center = canvas.center;
         let zoom = camera.zoom;
         let distanceScale = camera.distanceScale;
-        let vector = camera.crosshair;
+        let vector = camera.vector;
 
         let l = (((this.x * zoom) - (vector.x * zoom)) / distanceScale) + center.x;
         let t = (((this.y * zoom) - (vector.y * zoom)) / distanceScale) + center.y;

@@ -2,7 +2,7 @@
     <div>
         <canvas id="my-canvas"></canvas>
         <br>
-        <button @click="tick()">Tick</button>
+        <button @click="tick()">Tick: {{time}}</button>
         <button @click="paused = !paused">{{ (paused)?'Play':'Pause' }}</button>
         <button @click="interval = 500">Slow</button>
         <button @click="interval = 100">Normal</button>
@@ -13,7 +13,9 @@
         <button @click="moveUp">^</button>
         <button @click="moveDown">\/</button>
         <button @click="moveRight">>>></button>
-        <button @click="centerPlanet">>>></button>
+        <button @click="centerPlanet">Star 1</button>
+        <button @click="centerScreen">Center</button>
+        <p v-if="camera">Zoom: {{camera.zoom}}</p>
     </div>
 </template>
 
@@ -53,17 +55,18 @@
                 this.canvas.render();
             },
             setupCamera() {
-                this.camera = new Camera(this.canvas.center.x, this.canvas.center.y, 1);
+                this.camera = new Camera();
                 this.camera.distanceScale = 10000;
                 this.camera.draw(this.canvas);
             },
             setupUniverse() {
                 this.universe = new Universe(this.canvas.width, this.canvas.height, this.camera.distanceScale);
                 this.universe.createBodies();
+                this.camera.setVector(this.universe.center.x,this.universe.center.y);
             },
             setupFleets() {
-                // this.layers['fleets'] = new Fleets(this.canvas.resolution, this.distanceScale);
-                // this.layers['fleets'].createFleets();
+                this.fleets = new Fleets(new Vector(), this.distanceScale);
+                this.fleets.createFleets();
             },
             drawUniverse() {
                 this.universe.draw(this.canvas, this.camera, this.time);
@@ -118,9 +121,11 @@
             },
             centerPlanet() {
                 let system = this.universe.getAstro(0);
-                let systemVector = system.vector.fitToScreen(this.canvas, this.camera);
-                this.camera.crosshair.x = Math.floor(systemVector.x);
-                this.camera.crosshair.y = Math.floor(systemVector.y);
+                this.camera.vector = system.vector;
+                this.render();
+            },
+            centerScreen() {
+                this.camera.vector = this.universe.center;
                 this.render();
             }
         },

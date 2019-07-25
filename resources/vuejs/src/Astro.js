@@ -1,26 +1,28 @@
 import {Vector} from './Vector.js';
-import {Functions} from './Functions.js';
+import {fn} from './Functions.js';
 
 class Astro {
     constructor(name, orbit) {
         this.name = name || 'Object ' + new Function.rand(10000) + 1;
-        this.empireID = 0;
+        this.empireID = 0;//fn.rand(5)+1;//0;
         this.parent = null;
         this.orbit = {
-            path: orbit, // 1-10 orbit paths
+            path: 0, // 1-10 orbit paths
             distance: 0,
-            speed: 1, // degrees
-            initial: new Functions().rand(360) + 1, // start angle for object, 0-359
+            speed: 0, // degrees
+            initial: fn.rand(360) + 1, // start angle for object, 0-359
         };
         this.vector = new Vector();
         this.type = null;
         this.radius = 5;
 
-        this.orbit.distance = 7 * ((this.orbit.path + 1) * 2);
-        if (new Functions().rand(100)===1) {
-            this.orbit.speed = Math.floor(30 / this.orbit.path) + 1 + (new Functions().rand(3));
-        } else {
-            this.orbit.speed = -(Math.floor(30 / this.orbit.path) + 1 + (new Functions().rand(3)));
+        if (orbit > 0) {
+            this.orbit.distance = 7 * ((orbit + 1) * 2);
+            if (fn.rand(100) === 1) {
+                this.orbit.speed = Math.floor(30 / orbit) + 1 + (fn.rand(3));
+            } else {
+                this.orbit.speed = -(Math.floor(30 / orbit) + 1 + (fn.rand(3)));
+            }
         }
     }
 
@@ -45,6 +47,14 @@ class Astro {
         return newCoords;
     }
 
+    getEmpireColor(empireID){
+        let color = ['white','red','green','blue','purple','yellow'];
+        if (empireID >= color.length) {
+            console.log('EmpireID out of range');
+        }
+        return color[empireID];
+    }
+
     draw(canvas, camera, time) {
         let coords = this.move(time);
         let color = (this.type === 'star') ? 'yellow' : 'green';
@@ -52,11 +62,17 @@ class Astro {
         let astroCoords = new Vector(coords.x, coords.y);
         let canvasCoords = astroCoords.fitToScreen(canvas, camera);
 
-        if ((camera.zoom > (2*camera.distanceScale) && this.type === 'planet') || this.type === 'star')  {
+        if (this.type === 'star') {
             // canvas.drawCircle(newCoords.x, newCoords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
 
-            canvas.drawCircle(canvasCoords.x-canvas.center.x, canvasCoords.y-canvas.center.y, this.radius*(camera.zoom/10), color);
+            canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius * (camera.zoom / 10), this.radius+2), 'yellow');
+
+            // canvas.drawCircle(canvasCoords.x, canvasCoords.y, this.radius*2 * (camera.zoom / 10), 'transparent', this.getEmpireColor(this.empireID));
         }
-    }}
+        if ((camera.zoom > 1000 && this.type === 'planet')) {
+            canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius * (camera.zoom / 10), this.radius), 'green');
+        }
+    }
+}
 
 export {Astro};

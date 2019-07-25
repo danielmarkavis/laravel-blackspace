@@ -6,7 +6,7 @@ class Universe {
         this.bodies = [];
         this.maxSolarSystems = 200;
         this.minBodies = 1;
-        this.maxBodies = 3;
+        this.maxBodies = 5;
         this.maxOrbits = 20;
         this.width = (width * distanceScale) || 1280;
         this.height = (height * distanceScale) || 720;
@@ -15,7 +15,6 @@ class Universe {
             'x': this.width / 2,
             'y': this.height / 2
         };
-        console.log(this.width);
     }
 
     /**
@@ -37,10 +36,12 @@ class Universe {
         let fn = new Functions();
         // star.vector.setVector(this.center.x, this.center.y);
         star.vector.setVector(fn.rand(this.width), fn.rand(this.height));
+        star.name = this.systemNameGenerator();
+
         this.bodies.push(star); // Star
         this.createOrbits();
         for (let b = 1; b <= this.maxBodies; b++) {
-            this.createPlanet(star, systemID);
+            this.createPlanet(star, systemID, b);
         }
     }
 
@@ -48,13 +49,15 @@ class Universe {
      *
      * @param star
      * @param systemID
+     * @param planetIndex
      */
-    createPlanet(star, systemID) {
-        let rand = new Functions().rand(this.orbits.length);
+    createPlanet(star, systemID, planetIndex) {
+        let fn = new Functions();
+        let rand = fn.rand(this.orbits.length);
         let orbit = this.orbits[rand];
         this.removeOrbit(rand);
 
-        let planet = new Astro('Planet ' + (new Functions().rand(10000) + 1), orbit);
+        let planet = new Astro(star.name+'-'+planetIndex, orbit);
         planet.setAsPlanet();
         planet.setParent(systemID);
         planet.vector.setVector(star.vector.x, star.vector.y);
@@ -82,6 +85,24 @@ class Universe {
 
     getAstro(id) {
         return this.bodies[id];
+    }
+
+    systemNameGenerator() {
+        // XX-XXX such as F7-XZH (Base this some how on coords)
+        // Uses hex values 0-9 a-z but letters are first.
+        // [Quaduant][Sector]-[System]
+        //NOTE: Not using numbers yet and no double name check either.
+        let nStr = '';
+        let fn = new Functions();
+        for (let i = 0; i < 4; i++) {
+            if (i === 2) {
+                nStr += '-';
+            }
+            let letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z'];
+            let rand = fn.rand(26);
+            nStr += letters[rand];
+        }
+        return nStr;
     }
 
     /**
