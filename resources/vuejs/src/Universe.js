@@ -87,6 +87,14 @@ class Universe {
         return this.bodies[id];
     }
 
+    getStar(id) {
+        let astro = this.getAstro(id);
+        if (astro.parentId !== 0) {
+            return this.getStar(astro.parentId);
+        }
+        return this.bodies[id];
+    }
+
     systemNameGenerator() {
         // XX-XXX such as F7-XZH (Base this some how on coords)
         // Uses hex values 0-9 a-z but letters are first.

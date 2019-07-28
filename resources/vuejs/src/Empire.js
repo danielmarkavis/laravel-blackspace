@@ -1,18 +1,22 @@
 import {Vector} from './Vector.js';
+import {Fleet} from './Fleet.js';
+import {fn} from './Functions.js';
 
 class Empire {
 
-    constructor(empireID) {
-        this.owner = empireID;
-        this.speed = 0;
-        this.xp = 0;
+    constructor(empireID, name) {
+        this.name = name || 'Empire '+fn.rand(10000)+1;
+        this.empireID = empireID;
+        this.astroOwned = [];
     }
 
-    // draw(canvas) {
-    //     canvas.drawLine(canvas.center.x, 0, canvas.center.x, canvas.center.y-20, 'grey');
-    //     canvas.drawLine(canvas.center.x, canvas.center.y+20, canvas.center.x, canvas.height, 'grey');
-    //     canvas.drawCircle(canvas.center.x, canvas.center.y, 2, this.color);
-    // }
+    createFleet(fleets, target) {
+        let fleet = new Fleet(target.x, target.y, this.empireID);
+        fleets.push(fleet);
+    }
+
+    update() {
+    }
 }
 
 export {Empire};

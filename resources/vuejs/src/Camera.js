@@ -8,7 +8,7 @@ class Camera {
         this.vector = new Vector(0, 0);
         this.zoomStep = 2;
         this.maxZoom = 10000;
-        this.moveStep = 200 * this.distanceScale;
+        this.moveStep = 100 * this.distanceScale;
         this.color = 'blue';
     }
 
@@ -34,6 +34,7 @@ class Camera {
 
     moveLeft() {
         this.vector.moveLeft(this.moveStep);
+        console.log(this.moveStep);
     }
 
     moveRight() {

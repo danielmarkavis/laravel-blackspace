@@ -95,9 +95,10 @@
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _src_Canvas_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../src/Canvas.js */ "./resources/vuejs/src/Canvas.js");
-/* harmony import */ var _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../src/Camera.js */ "./resources/vuejs/src/Camera.js");
-/* harmony import */ var _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../src/Universe.js */ "./resources/vuejs/src/Universe.js");
+/* harmony import */ var _src_Game_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../src/Game.js */ "./resources/vuejs/src/Game.js");
+//
+//
+//
 //
 //
 //
@@ -120,119 +121,19 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 
-
-
-var time = 0;
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'Overview',
   components: {},
   data: function data() {
     return {
-      canvas: null,
-      camera: null,
-      universe: [],
-      fleets: [],
-      time: 0,
-      ticker: null,
-      paused: true,
-      interval: 100
+      game: null
     };
   },
   mounted: function mounted() {
-    this.setupCanvas();
-    this.setupCamera();
-    this.setupUniverse();
-    this.render();
-    this.auto();
+    this.game = new _src_Game_js__WEBPACK_IMPORTED_MODULE_0__["Game"]();
   },
-  methods: {
-    setupCanvas: function setupCanvas() {
-      this.canvas = new _src_Canvas_js__WEBPACK_IMPORTED_MODULE_0__["Canvas"]("my-canvas", {
-        width: 1280,
-        height: 720
-      });
-      this.canvas.render();
-    },
-    setupCamera: function setupCamera() {
-      this.camera = new _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__["Camera"]();
-      this.camera.distanceScale = 10000;
-      this.camera.draw(this.canvas);
-    },
-    setupUniverse: function setupUniverse() {
-      this.universe = new _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__["Universe"](this.canvas.width, this.canvas.height, this.camera.distanceScale);
-      this.universe.createBodies();
-      this.camera.setVector(this.universe.center.x, this.universe.center.y);
-    },
-    setupFleets: function setupFleets() {
-      this.fleets = new Fleets(new Vector(), this.distanceScale);
-      this.fleets.createFleets();
-    },
-    drawUniverse: function drawUniverse() {
-      this.universe.draw(this.canvas, this.camera, this.time);
-    },
-    drawFleets: function drawFleets() {
-      this.fleets.draw(this.canvas, this.camera, this.time);
-    },
-    drawCamera: function drawCamera() {
-      this.camera.draw(this.canvas);
-    },
-    tick: function tick() {
-      this.time++;
-      this.render();
-    },
-    auto: function auto() {
-      this.ticker = setInterval(function () {
-        if (!this.paused) {
-          this.tick();
-        }
-      }.bind(this), this.interval);
-    },
-    render: function render() {
-      this.canvas.clear();
-      this.drawCamera(); // this.layers['fleets'].drawFleetLines(this.canvas, this.time);
-
-      this.drawUniverse(); // this.layers['fleets'].drawFleets(this.canvas, this.time);
-    },
-    zoomIn: function zoomIn() {
-      this.camera.zoomIn();
-      this.render();
-    },
-    zoomOut: function zoomOut() {
-      this.camera.zoomOut();
-      this.render();
-    },
-    moveLeft: function moveLeft() {
-      this.camera.moveLeft();
-      this.render();
-    },
-    moveRight: function moveRight() {
-      this.camera.moveRight();
-      this.render();
-    },
-    moveUp: function moveUp() {
-      this.camera.moveUp();
-      this.render();
-    },
-    moveDown: function moveDown() {
-      this.camera.moveDown();
-      this.render();
-    },
-    centerPlanet: function centerPlanet() {
-      var system = this.universe.getAstro(0);
-      this.camera.vector = system.vector;
-      this.render();
-    },
-    centerScreen: function centerScreen() {
-      this.camera.vector = this.universe.center;
-      this.render();
-    }
-  },
-  watch: {
-    'interval': function interval() {
-      clearInterval(this.ticker);
-      this.auto();
-    }
-  }
+  methods: {},
+  watch: {}
 });
 
 /***/ }),
@@ -18398,84 +18299,140 @@ var render = function() {
     _vm._v(" "),
     _c("br"),
     _vm._v(" "),
-    _c(
-      "button",
-      {
-        on: {
-          click: function($event) {
-            return _vm.tick()
-          }
-        }
-      },
-      [_vm._v("Tick: " + _vm._s(_vm.time))]
-    ),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        on: {
-          click: function($event) {
-            _vm.paused = !_vm.paused
-          }
-        }
-      },
-      [_vm._v(_vm._s(_vm.paused ? "Play" : "Pause"))]
-    ),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        on: {
-          click: function($event) {
-            _vm.interval = 500
-          }
-        }
-      },
-      [_vm._v("Slow")]
-    ),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        on: {
-          click: function($event) {
-            _vm.interval = 100
-          }
-        }
-      },
-      [_vm._v("Normal")]
-    ),
-    _vm._v(" "),
-    _c(
-      "button",
-      {
-        on: {
-          click: function($event) {
-            _vm.interval = 30
-          }
-        }
-      },
-      [_vm._v("Fast >>>")]
-    ),
-    _vm._v(" "),
-    _c("button", { on: { click: _vm.zoomIn } }, [_vm._v("+")]),
-    _vm._v(" "),
-    _c("button", { on: { click: _vm.zoomOut } }, [_vm._v("-")]),
-    _vm._v(" "),
-    _c("button", { on: { click: _vm.moveLeft } }, [_vm._v("<<<")]),
-    _vm._v(" "),
-    _c("button", { on: { click: _vm.moveUp } }, [_vm._v("^")]),
-    _vm._v(" "),
-    _c("button", { on: { click: _vm.moveDown } }, [_vm._v("\\/")]),
-    _vm._v(" "),
-    _c("button", { on: { click: _vm.moveRight } }, [_vm._v(">>>")]),
-    _vm._v(" "),
-    _c("button", { on: { click: _vm.centerPlanet } }, [_vm._v("Star 1")]),
-    _vm._v(" "),
-    _c("button", { on: { click: _vm.centerScreen } }, [_vm._v("Center")]),
-    _vm._v(" "),
-    _vm.camera
-      ? _c("p", [_vm._v("Zoom: " + _vm._s(_vm.camera.zoom))])
+    _vm.game
+      ? _c("div", [
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.newGame()
+                }
+              }
+            },
+            [_vm._v("New")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.tick()
+                }
+              }
+            },
+            [_vm._v("Tick: " + _vm._s(_vm.game.ticker.time))]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.pauseGame()
+                }
+              }
+            },
+            [_vm._v(_vm._s(_vm.game.ticker.paused ? "Play" : "Pause"))]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.move("in")
+                }
+              }
+            },
+            [_vm._v("+")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.move("out")
+                }
+              }
+            },
+            [_vm._v("-")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.move("left")
+                }
+              }
+            },
+            [_vm._v("Left")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.move("right")
+                }
+              }
+            },
+            [_vm._v("Right")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.move("up")
+                }
+              }
+            },
+            [_vm._v("Up")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.move("down")
+                }
+              }
+            },
+            [_vm._v("Down")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.centerPlanet()
+                }
+              }
+            },
+            [_vm._v("Star 1")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.centerScreen()
+                }
+              }
+            },
+            [_vm._v("Center")]
+          )
+        ])
       : _vm._e()
   ])
 }
@@ -30732,11 +30689,10 @@ function () {
 
     if (orbit > 0) {
       this.orbit.distance = 7 * ((orbit + 1) * 2);
+      this.orbit.speed = Math.floor(30 / orbit) + 1 + _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(3);
 
       if (_Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(100) === 1) {
-        this.orbit.speed = Math.floor(30 / orbit) + 1 + _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(3);
-      } else {
-        this.orbit.speed = -(Math.floor(30 / orbit) + 1 + _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(3));
+        this.orbit.speed = -this.orbit.speed;
       }
     }
   }
@@ -30755,6 +30711,11 @@ function () {
     key: "setParent",
     value: function setParent(parentID) {
       this.parent = parentID;
+    }
+  }, {
+    key: "setOwner",
+    value: function setOwner(empireID) {
+      this.empireID = empireID;
     }
   }, {
     key: "move",
@@ -30788,11 +30749,12 @@ function () {
       var canvasCoords = astroCoords.fitToScreen(canvas, camera);
 
       if (this.type === 'star') {
-        // canvas.drawCircle(newCoords.x, newCoords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
-        canvas.drawCircle(canvasCoords.x, canvasCoords.y, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].max(this.radius * (camera.zoom / 10), this.radius + 2), 'yellow'); // canvas.drawCircle(canvasCoords.x, canvasCoords.y, this.radius*2 * (camera.zoom / 10), 'transparent', this.getEmpireColor(this.empireID));
+        canvas.drawCircle(canvasCoords.x, canvasCoords.y, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].max(this.radius * (camera.zoom / 10), this.radius + 2), 'yellow');
+        canvas.drawCircle(canvasCoords.x, canvasCoords.y, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].max(this.radius + 5 * (camera.zoom / 10), this.radius + 5), 'transparent', this.getEmpireColor(this.empireID));
       }
 
       if (camera.zoom > 1000 && this.type === 'planet') {
+        // canvas.drawCircle(coords.x, coords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
         canvas.drawCircle(canvasCoords.x, canvasCoords.y, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].max(this.radius * (camera.zoom / 10), this.radius), 'green');
       }
     }
@@ -30835,7 +30797,7 @@ function () {
     this.vector = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](0, 0);
     this.zoomStep = 2;
     this.maxZoom = 10000;
-    this.moveStep = 200 * this.distanceScale;
+    this.moveStep = 100 * this.distanceScale;
     this.color = 'blue';
   }
 
@@ -30867,6 +30829,7 @@ function () {
     key: "moveLeft",
     value: function moveLeft() {
       this.vector.moveLeft(this.moveStep);
+      console.log(this.moveStep);
     }
   }, {
     key: "moveRight",
@@ -30928,7 +30891,8 @@ function () {
     this.element = element;
     this.canvas = null;
     this.ctx = null;
-    this.width = resolution.width || 1280, this.height = resolution.height || 720;
+    this.width = resolution.width || 1280;
+    this.height = resolution.height || 720;
     this.center = {
       x: Math.round(resolution.width / 2),
       y: Math.round(resolution.height / 2)
@@ -31011,6 +30975,228 @@ function () {
 
 /***/ }),
 
+/***/ "./resources/vuejs/src/Empire.js":
+/*!***************************************!*\
+  !*** ./resources/vuejs/src/Empire.js ***!
+  \***************************************/
+/*! exports provided: Empire */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Empire", function() { return Empire; });
+/* harmony import */ var _Vector_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector.js */ "./resources/vuejs/src/Vector.js");
+/* harmony import */ var _Fleet_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Fleet.js */ "./resources/vuejs/src/Fleet.js");
+/* harmony import */ var _Functions_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Functions.js */ "./resources/vuejs/src/Functions.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+
+
+var Empire =
+/*#__PURE__*/
+function () {
+  function Empire(empireID, name) {
+    _classCallCheck(this, Empire);
+
+    this.name = name || 'Empire ' + _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(10000) + 1;
+    this.empireID = empireID;
+    this.astroOwned = [];
+  }
+
+  _createClass(Empire, [{
+    key: "createFleet",
+    value: function createFleet(fleets, target) {
+      var fleet = new _Fleet_js__WEBPACK_IMPORTED_MODULE_1__["Fleet"](target.x, target.y, this.empireID);
+      fleets.push(fleet);
+    }
+  }, {
+    key: "update",
+    value: function update() {}
+  }]);
+
+  return Empire;
+}();
+
+
+
+/***/ }),
+
+/***/ "./resources/vuejs/src/Empires.js":
+/*!****************************************!*\
+  !*** ./resources/vuejs/src/Empires.js ***!
+  \****************************************/
+/*! exports provided: Empires */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Empires", function() { return Empires; });
+/* harmony import */ var _Vector_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector.js */ "./resources/vuejs/src/Vector.js");
+/* harmony import */ var _Empire_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Empire.js */ "./resources/vuejs/src/Empire.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+
+var Empires =
+/*#__PURE__*/
+function () {
+  function Empires() {
+    _classCallCheck(this, Empires);
+
+    this.maxEmpires = 10;
+    this.empires = [];
+  }
+
+  _createClass(Empires, [{
+    key: "createEmpires",
+    value: function createEmpires(maxEmpires) {
+      var totalEmpires = maxEmpires || this.maxEmpires;
+
+      for (var e = 1; e <= totalEmpires; e++) {
+        this.createEmpire(e);
+      }
+    }
+  }, {
+    key: "createEmpire",
+    value: function createEmpire(id) {
+      var empire = new _Empire_js__WEBPACK_IMPORTED_MODULE_1__["Empire"](id);
+      this.empires.push(empire);
+    }
+  }, {
+    key: "startSystems",
+    value: function startSystems(universe) {
+      this.empires.forEach(function (empire) {
+        empire.createFleet(fleets, new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](0, 0));
+      });
+    }
+  }, {
+    key: "createFleets",
+    value: function createFleets(fleets) {
+      this.empires.forEach(function (empire) {
+        empire.createFleet(fleets, new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](0, 0));
+      });
+    }
+  }]);
+
+  return Empires;
+}();
+
+
+
+/***/ }),
+
+/***/ "./resources/vuejs/src/Fleet.js":
+/*!**************************************!*\
+  !*** ./resources/vuejs/src/Fleet.js ***!
+  \**************************************/
+/*! exports provided: Fleet */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Fleet", function() { return Fleet; });
+/* harmony import */ var _Vector_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector.js */ "./resources/vuejs/src/Vector.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var Fleet =
+/*#__PURE__*/
+function () {
+  /**
+   *
+   * @param x
+   * @param y
+   * @param empireID
+   */
+  function Fleet(x, y, empireID) {
+    _classCallCheck(this, Fleet);
+
+    this.vector = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](x, y);
+    this.target = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](x, y);
+    this.owner = empireID;
+    this.speed = 1;
+    this.xp = 0;
+    this.launchDate = 0;
+  }
+
+  _createClass(Fleet, [{
+    key: "hasArrived",
+    value: function hasArrived() {
+      if (this.target === this.vector) {
+        return true;
+      }
+
+      if (this.getDistance() <= 0) {
+        this.target = this.vector;
+        return true;
+      }
+
+      return false;
+    }
+  }, {
+    key: "getDistance",
+    value: function getDistance() {
+      return this.vector.getDistance(this.target.x, this.target.y);
+    }
+  }, {
+    key: "fleetETA",
+    value: function fleetETA(time) {
+      if (this.target === this.vector) {
+        return 0;
+      }
+    }
+  }, {
+    key: "setTarget",
+    value: function setTarget(x, y) {
+      this.target.setVector(x, y);
+    }
+  }, {
+    key: "setSpeed",
+    value: function setSpeed(speed) {
+      this.speed = speed;
+    }
+    /**
+     *
+     * @param target Vector
+     * @param time Integer
+     */
+
+  }, {
+    key: "launchFleet",
+    value: function launchFleet(target, time) {
+      this.setTarget(target.x, target.y);
+      this.launchDate = time;
+    }
+  }, {
+    key: "draw",
+    value: function draw(canvas) {
+      canvas.drawCircle(this.vector.x, this.vector.y, 2, this.color);
+    }
+  }]);
+
+  return Fleet;
+}();
+
+
+
+/***/ }),
+
 /***/ "./resources/vuejs/src/Functions.js":
 /*!******************************************!*\
   !*** ./resources/vuejs/src/Functions.js ***!
@@ -31064,6 +31250,252 @@ function () {
 }();
 
 var fn = new Functions();
+
+
+/***/ }),
+
+/***/ "./resources/vuejs/src/Game.js":
+/*!*************************************!*\
+  !*** ./resources/vuejs/src/Game.js ***!
+  \*************************************/
+/*! exports provided: Game */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Game", function() { return Game; });
+/* harmony import */ var _src_Canvas_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../src/Canvas.js */ "./resources/vuejs/src/Canvas.js");
+/* harmony import */ var _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../src/Camera.js */ "./resources/vuejs/src/Camera.js");
+/* harmony import */ var _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../src/Universe.js */ "./resources/vuejs/src/Universe.js");
+/* harmony import */ var _src_Ticker_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../src/Ticker.js */ "./resources/vuejs/src/Ticker.js");
+/* harmony import */ var _src_Empires_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../src/Empires.js */ "./resources/vuejs/src/Empires.js");
+/* harmony import */ var _src_Vector_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../src/Vector.js */ "./resources/vuejs/src/Vector.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+
+
+
+
+/**
+ * Deals with create a new game.
+ */
+
+var Game =
+/*#__PURE__*/
+function () {
+  function Game() {
+    _classCallCheck(this, Game);
+
+    this.newGame();
+  }
+
+  _createClass(Game, [{
+    key: "newGame",
+    value: function newGame() {
+      this.canvas = null;
+      this.camera = null;
+      this.ticker = null;
+      this.universe = [];
+      this.fleets = [];
+      this.empires = [];
+      this.paused = true;
+      this.interval = 100;
+      this.ticker = new _src_Ticker_js__WEBPACK_IMPORTED_MODULE_3__["Ticker"]();
+      this.setupCanvas();
+      this.setupCamera();
+      this.setupUniverse();
+      this.setupEmpires();
+      this.render();
+      this.ticker.startTimer(this.interval);
+    }
+  }, {
+    key: "setupCanvas",
+    value: function setupCanvas() {
+      this.canvas = new _src_Canvas_js__WEBPACK_IMPORTED_MODULE_0__["Canvas"]("my-canvas", {
+        width: 1280,
+        height: 720
+      });
+      this.canvas.render();
+    }
+  }, {
+    key: "setupCamera",
+    value: function setupCamera() {
+      this.camera = new _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__["Camera"]();
+      this.camera.distanceScale = 10000;
+      this.camera.setZoom(16000);
+      this.camera.draw(this.canvas);
+    }
+  }, {
+    key: "setupUniverse",
+    value: function setupUniverse() {
+      this.universe = new _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__["Universe"](this.canvas.width, this.canvas.height, this.camera.distanceScale);
+      this.universe.createBodies();
+      this.camera.setVector(this.universe.center.x, this.universe.center.y);
+      this.centerPlanet();
+    }
+  }, {
+    key: "setupEmpires",
+    value: function setupEmpires() {
+      this.empires = new _src_Empires_js__WEBPACK_IMPORTED_MODULE_4__["Empires"]();
+      this.empires.createEmpires();
+      this.empires.createFleets(this.fleets);
+    }
+  }, {
+    key: "drawUniverse",
+    value: function drawUniverse() {
+      this.universe.draw(this.canvas, this.camera, this.ticker.time);
+    }
+  }, {
+    key: "drawFleets",
+    value: function drawFleets() {
+      this.fleets.draw(this.canvas, this.camera, this.ticker.time);
+    }
+  }, {
+    key: "drawCamera",
+    value: function drawCamera() {
+      this.camera.draw(this.canvas);
+    }
+  }, {
+    key: "tick",
+    value: function tick() {
+      this.ticker.tick();
+      this.render();
+    }
+  }, {
+    key: "pauseGame",
+    value: function pauseGame() {
+      this.ticker.pause();
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      this.canvas.clear();
+      this.drawCamera();
+      this.drawUniverse();
+    }
+  }, {
+    key: "move",
+    value: function move(direction) {
+      switch (direction) {
+        case 'left':
+          this.camera.moveLeft();
+          break;
+
+        case 'right':
+          this.camera.moveRight();
+          break;
+
+        case 'up':
+          this.camera.moveUp();
+          break;
+
+        case 'down':
+          this.camera.moveDown();
+          break;
+
+        case 'in':
+          this.camera.zoomIn();
+          break;
+
+        case 'out':
+          this.camera.zoomOut();
+          break;
+      }
+
+      this.render();
+    }
+  }, {
+    key: "centerPlanet",
+    value: function centerPlanet() {
+      var system = this.universe.getAstro(0);
+      this.camera.vector = new _src_Vector_js__WEBPACK_IMPORTED_MODULE_5__["Vector"](system.vector.x, system.vector.y);
+      this.render();
+    }
+  }, {
+    key: "centerScreen",
+    value: function centerScreen() {
+      this.camera.vector = new _src_Vector_js__WEBPACK_IMPORTED_MODULE_5__["Vector"](this.universe.center.x, this.universe.center.y);
+      this.render();
+    }
+  }]);
+
+  return Game;
+}();
+
+
+
+/***/ }),
+
+/***/ "./resources/vuejs/src/Ticker.js":
+/*!***************************************!*\
+  !*** ./resources/vuejs/src/Ticker.js ***!
+  \***************************************/
+/*! exports provided: Ticker */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Ticker", function() { return Ticker; });
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+var Ticker =
+/*#__PURE__*/
+function () {
+  function Ticker(interval) {
+    _classCallCheck(this, Ticker);
+
+    this.time = 0;
+    this.timer = null;
+    this.paused = true;
+    this.interval = interval || 100; //100ms
+  }
+
+  _createClass(Ticker, [{
+    key: "setInterval",
+    value: function setInterval() {}
+  }, {
+    key: "startTimer",
+    value: function startTimer() {
+      if (this.timer !== null) {
+        clearInterval(this.timer);
+      }
+
+      this.timer = setInterval(function () {
+        if (!this.paused) {
+          this.tick();
+        }
+      }.bind(this), this.interval);
+    }
+  }, {
+    key: "pause",
+    value: function pause() {
+      this.paused = true;
+    }
+  }, {
+    key: "play",
+    value: function play() {
+      this.paused = false;
+    }
+  }, {
+    key: "tick",
+    value: function tick() {
+      this.time++;
+    }
+  }]);
+
+  return Ticker;
+}();
+
 
 
 /***/ }),
@@ -31188,6 +31620,17 @@ function () {
   }, {
     key: "getAstro",
     value: function getAstro(id) {
+      return this.bodies[id];
+    }
+  }, {
+    key: "getStar",
+    value: function getStar(id) {
+      var astro = this.getAstro(id);
+
+      if (astro.parentId !== 0) {
+        return this.getStar(astro.parentId);
+      }
+
       return this.bodies[id];
     }
   }, {

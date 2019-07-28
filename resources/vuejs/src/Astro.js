@@ -18,10 +18,9 @@ class Astro {
 
         if (orbit > 0) {
             this.orbit.distance = 7 * ((orbit + 1) * 2);
+            this.orbit.speed = Math.floor(30 / orbit) + 1 + (fn.rand(3));
             if (fn.rand(100) === 1) {
-                this.orbit.speed = Math.floor(30 / orbit) + 1 + (fn.rand(3));
-            } else {
-                this.orbit.speed = -(Math.floor(30 / orbit) + 1 + (fn.rand(3)));
+                this.orbit.speed = -this.orbit.speed;
             }
         }
     }
@@ -36,6 +35,10 @@ class Astro {
 
     setParent(parentID) {
         this.parent = parentID;
+    }
+
+    setOwner(empireID) {
+        this.empireID = empireID;
     }
 
     move(time) {
@@ -63,13 +66,13 @@ class Astro {
         let canvasCoords = astroCoords.fitToScreen(canvas, camera);
 
         if (this.type === 'star') {
-            // canvas.drawCircle(newCoords.x, newCoords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
 
             canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius * (camera.zoom / 10), this.radius+2), 'yellow');
 
-            // canvas.drawCircle(canvasCoords.x, canvasCoords.y, this.radius*2 * (camera.zoom / 10), 'transparent', this.getEmpireColor(this.empireID));
+            canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius+5 * (camera.zoom / 10), this.radius+5), 'transparent', this.getEmpireColor(this.empireID));
         }
         if ((camera.zoom > 1000 && this.type === 'planet')) {
+            // canvas.drawCircle(coords.x, coords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
             canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius * (camera.zoom / 10), this.radius), 'green');
         }
     }

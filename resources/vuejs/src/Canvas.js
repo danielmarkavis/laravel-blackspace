@@ -8,8 +8,8 @@ class Canvas {
         this.element = element;
         this.canvas = null;
         this.ctx = null;
-        this.width = resolution.width || 1280,
-        this.height = resolution.height || 720
+        this.width = resolution.width || 1280;
+        this.height = resolution.height || 720;
         this.center = {
             x: Math.round(resolution.width / 2),
             y: Math.round(resolution.height / 2)
