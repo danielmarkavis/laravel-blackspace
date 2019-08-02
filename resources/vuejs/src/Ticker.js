@@ -1,14 +1,14 @@
 class Ticker {
 
-    constructor(interval) {
+    constructor(interval, callBack) {
         this.time = 0;
         this.timer = null;
         this.paused = true;
         this.interval = interval || 100; //100ms
+        this.callBack = callBack;
     }
 
     setInterval() {
-
     }
 
     startTimer() {
@@ -17,7 +17,7 @@ class Ticker {
         }
         this.timer = setInterval(function () {
             if (!this.paused) {
-                this.tick();
+                this.callBack();
             }
         }.bind(this), this.interval);
     }

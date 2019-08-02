@@ -23,7 +23,10 @@ class Game {
         this.paused = true;
         this.interval = 100;
 
-        this.ticker = new Ticker();
+        this.ticker = new Ticker(100, ()=>{
+            this.ticker.tick();
+            this.render();
+        });
         this.setupCanvas();
         this.setupCamera();
         this.setupUniverse();
@@ -75,8 +78,12 @@ class Game {
         this.render();
     }
 
-    pauseGame() {
-        this.ticker.pause();
+    play($status) {
+        if ($status) {
+            this.ticker.play();
+        } else {
+            this.ticker.pause();
+        }
     }
 
     render() {

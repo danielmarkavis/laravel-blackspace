@@ -5,7 +5,8 @@
         <div v-if="game">
             <button @click="game.newGame()">New</button>
             <button @click="game.tick()">Tick: {{game.ticker.time}}</button>
-            <button @click="game.pauseGame()">{{ (game.ticker.paused) ? 'Play' : 'Pause' }}</button>
+            <button @click="game.play(true)">Play</button>
+            <button @click="game.play(false)">Pause</button>
             <!--        <button @click="interval = 500">Slow</button>-->
             <!--        <button @click="interval = 100">Normal</button>-->
             <!--        <button @click="interval = 30">Fast >>></button>-->
