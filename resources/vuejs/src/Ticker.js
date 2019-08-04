@@ -13,7 +13,7 @@ class Ticker {
 
     startTimer() {
         if (this.timer !== null) {
-            clearInterval(this.timer);
+            this.killTimer();
         }
         this.timer = setInterval(function () {
             if (!this.paused) {
@@ -22,6 +22,10 @@ class Ticker {
         }.bind(this), this.interval);
     }
 
+    killTimer() {
+        clearInterval(this.timer);
+        this.paused = true;
+    }
     pause() {
         this.paused = true;
     }

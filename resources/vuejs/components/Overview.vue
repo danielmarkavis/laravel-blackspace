@@ -4,9 +4,9 @@
         <br>
         <div v-if="game">
             <button @click="game.newGame()">New</button>
+            <button @click="toggle()">Play</button>
             <button @click="game.tick()">Tick: {{game.ticker.time}}</button>
-            <button @click="game.play(true)">Play</button>
-            <button @click="game.play(false)">Pause</button>
+<!--            <button @click="game.play(false)">Pause</button>-->
             <!--        <button @click="interval = 500">Slow</button>-->
             <!--        <button @click="interval = 100">Normal</button>-->
             <!--        <button @click="interval = 30">Fast >>></button>-->
@@ -18,6 +18,7 @@
             <button @click="game.move('down')">Down</button>
             <button @click="game.centerPlanet()">Star 1</button>
             <button @click="game.centerScreen()">Center</button>
+            <button @click="game.testFleetLaunch()">Launch</button>
             <!--        <p v-if="camera">Zoom: {{camera.zoom}}</p>-->
         </div>
     </div>
@@ -31,6 +32,7 @@
         components: {},
         data() {
             return {
+                playing: false,
                 game: null,
             }
         },
@@ -38,8 +40,11 @@
             this.game = new Game();
         },
         methods: {
+            toggle(){
+                this.playing = !this.playing;
+                this.game.play(this.playing);
+            }
         },
-        watch: {
-        }
+        watch: {}
     }
 </script>

@@ -1,10 +1,11 @@
 import {Astro} from './Astro.js';
-import {Functions} from './Functions.js';
+import {fn} from './Functions.js';
 
 class Universe {
     constructor(width, height, distanceScale) {
         this.bodies = [];
-        this.maxSolarSystems = 200;
+        this.stars = []; // Array index of stars
+        this.maxSolarSystems = 2000;
         this.minBodies = 1;
         this.maxBodies = 5;
         this.maxOrbits = 20;
@@ -24,6 +25,7 @@ class Universe {
         for (let s = 1; s <= this.maxSolarSystems; s++) {
             this.createSolarSystem(s);
         }
+        // console.log(this.stars);
     }
 
     /**
@@ -31,18 +33,23 @@ class Universe {
      * @param systemID
      */
     createSolarSystem(systemID) {
-        let star = new Astro('Star ' + systemID);
-        star.setAsStar();
-        let fn = new Functions();
-        // star.vector.setVector(this.center.x, this.center.y);
-        star.vector.setVector(fn.rand(this.width), fn.rand(this.height));
-        star.name = this.systemNameGenerator();
-
-        this.bodies.push(star); // Star
-        this.createOrbits();
-        for (let b = 1; b <= this.maxBodies; b++) {
+        let star = this.createStar(systemID);
+        let max = fn.rand(this.maxBodies)+1;
+        for (let b = 1; b <= max; b++) {
             this.createPlanet(star, systemID, b);
         }
+    }
+
+    createStar(systemID) {
+        let star = new Astro('Star ' + systemID);
+        star.setAsStar();
+        star.vector.setVector(fn.rand(this.width), fn.rand(this.height));
+        star.name = this.systemNameGenerator();
+        star.astroID = this.bodies.length;
+        this.bodies.push(star); // Star
+        this.stars.push(this.bodies.length - 1);
+        this.createOrbits();
+        return star;
     }
 
     /**
@@ -52,15 +59,15 @@ class Universe {
      * @param planetIndex
      */
     createPlanet(star, systemID, planetIndex) {
-        let fn = new Functions();
         let rand = fn.rand(this.orbits.length);
         let orbit = this.orbits[rand];
         this.removeOrbit(rand);
 
-        let planet = new Astro(star.name+'-'+planetIndex, orbit);
+        let planet = new Astro(star.name + '-' + planetIndex, orbit);
         planet.setAsPlanet();
         planet.setParent(systemID);
         planet.vector.setVector(star.vector.x, star.vector.y);
+        planet.astroID = this.bodies.length - 1;
 
         this.bodies.push(planet); // Planets
     }
@@ -71,7 +78,7 @@ class Universe {
     createOrbits() {
         this.orbits = [];
         for (let i = 0; i < this.maxOrbits; i++) {
-            this.orbits[i] = i+1;
+            this.orbits[i] = i + 1;
         }
     }
 
@@ -84,15 +91,23 @@ class Universe {
     }
 
     getAstro(id) {
+        if (id > this.bodies.length) {
+            console.log('ERROR: getAstro(), index out of range!');
+            return false;
+        }
         return this.bodies[id];
     }
 
     getStar(id) {
-        let astro = this.getAstro(id);
-        if (astro.parentId !== 0) {
-            return this.getStar(astro.parentId);
+        if (id > this.stars.length) {
+            console.log('ERROR: getStar(), index out of range!');
+            return false;
         }
-        return this.bodies[id];
+        return this.getAstro( this.stars[id]);
+    }
+
+    captureSystem(systemID, empireID) {
+        this.bodies[systemID].empireID = empireID;
     }
 
     systemNameGenerator() {
@@ -101,13 +116,13 @@ class Universe {
         // [Quaduant][Sector]-[System]
         //NOTE: Not using numbers yet and no double name check either.
         let nStr = '';
-        let fn = new Functions();
-        for (let i = 0; i < 4; i++) {
+        let letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+
+        for (let i = 0; i <= 4; i++) {
             if (i === 2) {
                 nStr += '-';
             }
-            let letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z'];
-            let rand = fn.rand(26);
+            let rand = fn.rand(letters.length);
             nStr += letters[rand];
         }
         return nStr;

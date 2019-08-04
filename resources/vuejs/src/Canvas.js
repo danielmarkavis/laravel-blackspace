@@ -64,6 +64,18 @@ class Canvas {
         this.ctx.stroke();
     }
 
+    drawTriangle(x, y, color) {
+        if (!this.isReady()) {
+            return false;
+        }
+        this.ctx.strokeStyle = color;
+        this.ctx.beginPath();
+        this.ctx.moveTo(75, 50);
+        this.ctx.lineTo(100, 75);
+        this.ctx.lineTo(100, 25);
+        this.ctx.fill();
+    }
+
     isReady() {
         if (!this.ctx) {
             console.log('Canvas not ready');

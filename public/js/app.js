@@ -121,19 +121,26 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'Overview',
   components: {},
   data: function data() {
     return {
+      playing: false,
       game: null
     };
   },
   mounted: function mounted() {
     this.game = new _src_Game_js__WEBPACK_IMPORTED_MODULE_0__["Game"]();
   },
-  methods: {},
+  methods: {
+    toggle: function toggle() {
+      this.playing = !this.playing;
+      this.game.play(this.playing);
+    }
+  },
   watch: {}
 });
 
@@ -18319,19 +18326,7 @@ var render = function() {
             {
               on: {
                 click: function($event) {
-                  return _vm.game.tick()
-                }
-              }
-            },
-            [_vm._v("Tick: " + _vm._s(_vm.game.ticker.time))]
-          ),
-          _vm._v(" "),
-          _c(
-            "button",
-            {
-              on: {
-                click: function($event) {
-                  return _vm.game.play(true)
+                  return _vm.toggle()
                 }
               }
             },
@@ -18343,11 +18338,11 @@ var render = function() {
             {
               on: {
                 click: function($event) {
-                  return _vm.game.play(false)
+                  return _vm.game.tick()
                 }
               }
             },
-            [_vm._v("Pause")]
+            [_vm._v("Tick: " + _vm._s(_vm.game.ticker.time))]
           ),
           _vm._v(" "),
           _c(
@@ -18444,6 +18439,18 @@ var render = function() {
               }
             },
             [_vm._v("Center")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              on: {
+                click: function($event) {
+                  return _vm.game.testFleetLaunch()
+                }
+              }
+            },
+            [_vm._v("Launch")]
           )
         ])
       : _vm._e()
@@ -30684,8 +30691,9 @@ function () {
     _classCallCheck(this, Astro);
 
     this.name = name || 'Object ' + new Function.rand(10000) + 1;
-    this.empireID = 0; //fn.rand(5)+1;//0;
+    this.empireID = -1; //fn.rand(5)+1;//0;
 
+    this.astroID = null;
     this.parent = null;
     this.orbit = {
       path: 0,
@@ -30743,17 +30751,6 @@ function () {
       return newCoords;
     }
   }, {
-    key: "getEmpireColor",
-    value: function getEmpireColor(empireID) {
-      var color = ['white', 'red', 'green', 'blue', 'purple', 'yellow'];
-
-      if (empireID >= color.length) {
-        console.log('EmpireID out of range');
-      }
-
-      return color[empireID];
-    }
-  }, {
     key: "draw",
     value: function draw(canvas, camera, time) {
       var coords = this.move(time);
@@ -30763,7 +30760,7 @@ function () {
 
       if (this.type === 'star') {
         canvas.drawCircle(canvasCoords.x, canvasCoords.y, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].max(this.radius * (camera.zoom / 10), this.radius + 2), 'yellow');
-        canvas.drawCircle(canvasCoords.x, canvasCoords.y, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].max(this.radius + 5 * (camera.zoom / 10), this.radius + 5), 'transparent', this.getEmpireColor(this.empireID));
+        canvas.drawCircle(canvasCoords.x, canvasCoords.y, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].max(this.radius + 5 * (camera.zoom / 10), this.radius + 5), 'transparent', _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireColor(this.empireID));
       }
 
       if (camera.zoom > 1000 && this.type === 'planet') {
@@ -30970,6 +30967,20 @@ function () {
       this.ctx.stroke();
     }
   }, {
+    key: "drawTriangle",
+    value: function drawTriangle(x, y, color) {
+      if (!this.isReady()) {
+        return false;
+      }
+
+      this.ctx.strokeStyle = color;
+      this.ctx.beginPath();
+      this.ctx.moveTo(75, 50);
+      this.ctx.lineTo(100, 75);
+      this.ctx.lineTo(100, 25);
+      this.ctx.fill();
+    }
+  }, {
     key: "isReady",
     value: function isReady() {
       if (!this.ctx) {
@@ -31020,17 +31031,97 @@ function () {
     this.name = name || 'Empire ' + _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(10000) + 1;
     this.empireID = empireID;
     this.astroOwned = [];
+    this.fleets = [];
   }
 
   _createClass(Empire, [{
     key: "createFleet",
-    value: function createFleet(fleets, target) {
-      var fleet = new _Fleet_js__WEBPACK_IMPORTED_MODULE_1__["Fleet"](target.x, target.y, this.empireID);
-      fleets.push(fleet);
+    value: function createFleet(fleets, astroID, target) {
+      var fleetID = fleets.addFleet(astroID, target.x, target.y, this.empireID);
+      this.fleets.push(fleetID);
     }
   }, {
     key: "update",
     value: function update() {}
+    /**
+     *
+     * @param universe
+     * @param fleet
+     * @returns {null}
+     */
+
+  }, {
+    key: "botFindTargetClosest",
+    value: function botFindTargetClosest(universe, fleet) {
+      var target = null;
+      var i = 0;
+      var currentDistance = null;
+
+      while (i < 100) {
+        i++;
+        var planetID = _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(universe.stars.length);
+        var system = universe.getStar(planetID);
+        var distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y);
+
+        if (currentDistance === null) {
+          currentDistance = distance;
+        }
+
+        if (system.owner !== this.empireID) {
+          if (distance < currentDistance) {
+            target = system;
+            currentDistance = distance;
+          }
+        }
+      }
+
+      return target;
+    }
+    /**
+     * Target star, if:
+     * Target is not me
+     * @param universe
+     * @returns {null}
+     */
+
+  }, {
+    key: "botFindTarget",
+    value: function botFindTarget(universe) {
+      var target = null;
+      var i = 0;
+
+      while (target === null && i < universe.bodies.length * 2) {
+        i++;
+        var planetID = _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(universe.stars.length);
+        var system = universe.getStar(planetID);
+
+        if (system.owner !== this.empireID) {
+          target = system;
+        }
+      }
+
+      return target;
+    }
+  }, {
+    key: "botLaunchFleet",
+    value: function botLaunchFleet(universe, fleets, time) {
+      var _this = this;
+
+      this.fleets.forEach(function (fleetID) {
+        if (fleets.fleet[fleetID].isHome()) {
+          var target = _this.botFindTargetClosest(universe, fleets.fleet[fleetID]);
+
+          if (target && fleets.fleet[fleetID].location !== target.astroID) {
+            fleets.fleet[fleetID].launchFleet(target.astroID, target, time);
+          }
+        }
+      });
+    }
+  }, {
+    key: "tick",
+    value: function tick(universe, fleets, time) {
+      this.botLaunchFleet(universe, fleets, time);
+    }
   }]);
 
   return Empire;
@@ -31050,15 +31141,14 @@ function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Empires", function() { return Empires; });
-/* harmony import */ var _Vector_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector.js */ "./resources/vuejs/src/Vector.js");
-/* harmony import */ var _Empire_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Empire.js */ "./resources/vuejs/src/Empire.js");
+/* harmony import */ var _Empire_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Empire.js */ "./resources/vuejs/src/Empire.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-
+// import {Vector} from './Vector.js';
 
 
 var Empires =
@@ -31067,7 +31157,7 @@ function () {
   function Empires() {
     _classCallCheck(this, Empires);
 
-    this.maxEmpires = 10;
+    this.maxEmpires = 5;
     this.empires = [];
   }
 
@@ -31076,28 +31166,31 @@ function () {
     value: function createEmpires(maxEmpires) {
       var totalEmpires = maxEmpires || this.maxEmpires;
 
-      for (var e = 1; e <= totalEmpires; e++) {
+      for (var e = 0; e < totalEmpires; e++) {
         this.createEmpire(e);
       }
     }
   }, {
     key: "createEmpire",
     value: function createEmpire(id) {
-      var empire = new _Empire_js__WEBPACK_IMPORTED_MODULE_1__["Empire"](id);
+      var empire = new _Empire_js__WEBPACK_IMPORTED_MODULE_0__["Empire"](id);
       this.empires.push(empire);
     }
   }, {
-    key: "startSystems",
-    value: function startSystems(universe) {
-      this.empires.forEach(function (empire) {
-        empire.createFleet(fleets, new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](0, 0));
+    key: "createFleets",
+    value: function createFleets(universe, fleets) {
+      this.empires.forEach(function (empire, key) {
+        var system = universe.getStar(key); // console.log(system);
+
+        universe.captureSystem(system.astroID, key);
+        empire.createFleet(fleets, key, system.vector);
       });
     }
   }, {
-    key: "createFleets",
-    value: function createFleets(fleets) {
-      this.empires.forEach(function (empire) {
-        empire.createFleet(fleets, new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](0, 0));
+    key: "tick",
+    value: function tick(universe, fleets, time) {
+      this.empires.forEach(function (empire, key) {
+        empire.tick(universe, fleets, time);
       });
     }
   }]);
@@ -31119,7 +31212,8 @@ function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Fleet", function() { return Fleet; });
-/* harmony import */ var _Vector_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector.js */ "./resources/vuejs/src/Vector.js");
+/* harmony import */ var _Functions_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Functions.js */ "./resources/vuejs/src/Functions.js");
+/* harmony import */ var _Vector_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Vector.js */ "./resources/vuejs/src/Vector.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -31128,82 +31222,212 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 
 
+
 var Fleet =
 /*#__PURE__*/
 function () {
   /**
-   *
+   * @param astroID
    * @param x
    * @param y
    * @param empireID
    */
-  function Fleet(x, y, empireID) {
+  function Fleet(astroID, x, y, empireID) {
     _classCallCheck(this, Fleet);
 
-    this.vector = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](x, y);
-    this.target = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](x, y);
+    this.locationVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](x, y);
+    this.startVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](x, y);
+    this.endVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](x, y);
+    this.location = astroID; // index for the astro array
+
+    this.target = astroID; // index for the astro array
+
     this.owner = empireID;
-    this.speed = 1;
+    this.speed = 50000;
     this.xp = 0;
     this.launchDate = 0;
+    this.travelTime = 0;
+    this.color = 'white';
   }
 
   _createClass(Fleet, [{
+    key: "isHome",
+    value: function isHome() {
+      return this.location === this.target;
+    }
+  }, {
     key: "hasArrived",
-    value: function hasArrived() {
-      if (this.target === this.vector) {
-        return true;
-      }
-
-      if (this.getDistance() <= 0) {
-        this.target = this.vector;
-        return true;
-      }
-
-      return false;
+    value: function hasArrived(time) {
+      return this.getTimeToTarget(time) <= 0;
     }
   }, {
     key: "getDistance",
     value: function getDistance() {
-      return this.vector.getDistance(this.target.x, this.target.y);
+      return this.locationVector.getDistance(this.endVector.x, this.endVector.y);
     }
   }, {
-    key: "fleetETA",
-    value: function fleetETA(time) {
-      if (this.target === this.vector) {
-        return 0;
-      }
+    key: "getArrivalTime",
+    value: function getArrivalTime() {
+      var distance = this.getDistance();
+      return Math.ceil(distance / this.speed); // Get tick of arrival.
+    }
+  }, {
+    key: "getTimeToTarget",
+    value: function getTimeToTarget(time) {
+      return this.launchDate + this.travelTime - time;
     }
   }, {
     key: "setTarget",
-    value: function setTarget(x, y) {
-      this.target.setVector(x, y);
+    value: function setTarget(astroID, x, y) {
+      this.target = astroID;
+      this.endVector.setVector(x, y);
     }
   }, {
     key: "setSpeed",
     value: function setSpeed(speed) {
       this.speed = speed;
     }
+  }, {
+    key: "move",
+    value: function move(coords, time) {
+      if (this.isHome()) {
+        return coords;
+      }
+
+      var percentComplete = (time - this.launchDate) / this.travelTime; // console.log('Tick: '+percentComplete+'%, Launched: '+ this.launchDate +', TravelTime: '+ this.travelTime + ', Arrival: ' + (this.launchDate + this.travelTime));
+
+      var relativeVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](this.startVector.x - this.endVector.x, this.startVector.y - this.endVector.y);
+      relativeVector.x = Math.round(relativeVector.x * percentComplete);
+      relativeVector.y = Math.round(relativeVector.y * percentComplete); // console.log(relativeVector);
+
+      return new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](this.startVector.x - relativeVector.x, this.startVector.y - relativeVector.y);
+    }
     /**
-     *
-     * @param target Vector
-     * @param time Integer
+     * @param astroID
+     * @param target
+     * @param time
      */
 
   }, {
     key: "launchFleet",
-    value: function launchFleet(target, time) {
-      this.setTarget(target.x, target.y);
+    value: function launchFleet(astroID, target, time) {
+      this.setTarget(astroID, target.vector.x, target.vector.y);
       this.launchDate = time;
+      this.travelTime = this.getArrivalTime();
+      console.log('Fleet has been launched to target: ' + this.travelTime + ' weeks');
+      console.log('Distance is ' + this.getDistance());
+    }
+  }, {
+    key: "setArrived",
+    value: function setArrived() {
+      console.log('Fleet has arrived at target');
+      this.locationVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](this.endVector.x, this.endVector.y);
+      this.startVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](this.endVector.x, this.endVector.y);
+      this.location = this.target;
+    }
+  }, {
+    key: "tick",
+    value: function tick(universe, time) {
+      if (this.hasArrived(time) && !this.isHome()) {
+        this.setArrived();
+        console.log(this.owner);
+        var system = universe.getAstro(this.location);
+        universe.captureSystem(system.astroID, this.owner);
+      }
     }
   }, {
     key: "draw",
-    value: function draw(canvas) {
-      canvas.drawCircle(this.vector.x, this.vector.y, 2, this.color);
+    value: function draw(canvas, camera, time) {
+      var coords = this.move(this.locationVector, time);
+      var astroCoords = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](coords.x, coords.y);
+      var canvasCoords = astroCoords.fitToScreen(canvas, camera);
+      var offset = 0;
+
+      if (this.isHome()) {
+        offset = 10;
+      }
+
+      canvas.fillRect(Math.round(canvasCoords.x - 2) + offset, Math.round(canvasCoords.y - 2) + offset, 5, 5, _Functions_js__WEBPACK_IMPORTED_MODULE_0__["fn"].getEmpireColor(this.owner));
+    }
+  }, {
+    key: "drawLines",
+    value: function drawLines(canvas, camera) {
+      if (this.hasArrived()) {
+        return;
+      }
+
+      var fromCoords = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](this.startVector.x, this.startVector.y);
+      var toCoords = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](this.endVector.x, this.endVector.y);
+      var fromCanvasCoords = fromCoords.fitToScreen(canvas, camera);
+      var toCanvasCoords = toCoords.fitToScreen(canvas, camera);
+      canvas.drawLine(Math.round(fromCanvasCoords.x), Math.round(fromCanvasCoords.y), Math.round(toCanvasCoords.x), Math.round(toCanvasCoords.y), 'dimgray'); // canvas.fillRect(, 5, 5, this.color);
     }
   }]);
 
   return Fleet;
+}();
+
+
+
+/***/ }),
+
+/***/ "./resources/vuejs/src/Fleets.js":
+/*!***************************************!*\
+  !*** ./resources/vuejs/src/Fleets.js ***!
+  \***************************************/
+/*! exports provided: Fleets */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Fleets", function() { return Fleets; });
+/* harmony import */ var _Fleet_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Fleet.js */ "./resources/vuejs/src/Fleet.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+// import {Vector} from './Vector.js';
+
+
+var Fleets =
+/*#__PURE__*/
+function () {
+  function Fleets() {
+    _classCallCheck(this, Fleets);
+
+    this.fleet = [];
+  }
+
+  _createClass(Fleets, [{
+    key: "addFleet",
+    value: function addFleet(astroID, x, y, empireID) {
+      var fleet = new _Fleet_js__WEBPACK_IMPORTED_MODULE_0__["Fleet"](astroID, x, y, empireID);
+      this.fleet.push(fleet);
+      return this.fleet.length - 1;
+    }
+  }, {
+    key: "tick",
+    value: function tick(universe, time) {
+      this.fleet.forEach(function (fleet) {
+        fleet.tick(universe, time);
+      });
+    }
+  }, {
+    key: "draw",
+    value: function draw(canvas, camera, time, section) {
+      this.fleet.forEach(function (fleet) {
+        if (section === 'fleets') {
+          fleet.draw(canvas, camera, time);
+        } else {
+          fleet.drawLines(canvas, camera, time);
+        }
+      });
+    }
+  }]);
+
+  return Fleets;
 }();
 
 
@@ -31257,6 +31481,22 @@ function () {
 
       return value;
     }
+  }, {
+    key: "getEmpireColor",
+    value: function getEmpireColor(empireID) {
+      var color = ['green', 'orange', 'red', 'blue', 'purple', 'yellow', 'white'];
+
+      if (empireID < 0) {
+        return "transparent";
+      }
+
+      if (empireID >= color.length) {
+        console.log('EmpireID out of range');
+        return "transparent";
+      }
+
+      return color[empireID];
+    }
   }]);
 
   return Functions;
@@ -31280,14 +31520,16 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _src_Canvas_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../src/Canvas.js */ "./resources/vuejs/src/Canvas.js");
 /* harmony import */ var _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../src/Camera.js */ "./resources/vuejs/src/Camera.js");
 /* harmony import */ var _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../src/Universe.js */ "./resources/vuejs/src/Universe.js");
-/* harmony import */ var _src_Ticker_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../src/Ticker.js */ "./resources/vuejs/src/Ticker.js");
-/* harmony import */ var _src_Empires_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../src/Empires.js */ "./resources/vuejs/src/Empires.js");
-/* harmony import */ var _src_Vector_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../src/Vector.js */ "./resources/vuejs/src/Vector.js");
+/* harmony import */ var _src_Fleets_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../src/Fleets.js */ "./resources/vuejs/src/Fleets.js");
+/* harmony import */ var _src_Ticker_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../src/Ticker.js */ "./resources/vuejs/src/Ticker.js");
+/* harmony import */ var _src_Empires_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../src/Empires.js */ "./resources/vuejs/src/Empires.js");
+/* harmony import */ var _src_Vector_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../src/Vector.js */ "./resources/vuejs/src/Vector.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 
 
 
@@ -31313,6 +31555,10 @@ function () {
     value: function newGame() {
       var _this = this;
 
+      if (this.ticker != null) {
+        this.ticker.killTimer();
+      }
+
       this.canvas = null;
       this.camera = null;
       this.ticker = null;
@@ -31320,18 +31566,21 @@ function () {
       this.fleets = [];
       this.empires = [];
       this.paused = true;
-      this.interval = 100;
-      this.ticker = new _src_Ticker_js__WEBPACK_IMPORTED_MODULE_3__["Ticker"](100, function () {
-        _this.ticker.tick();
-
-        _this.render();
+      this.options = {
+        'distanceScale': 10000,
+        'zoom': 1,
+        'interval': 1
+      };
+      this.ticker = new _src_Ticker_js__WEBPACK_IMPORTED_MODULE_4__["Ticker"](this.options.interval, function () {
+        _this.tick();
       });
       this.setupCanvas();
       this.setupCamera();
       this.setupUniverse();
+      this.setupFleets();
       this.setupEmpires();
       this.render();
-      this.ticker.startTimer(this.interval);
+      this.ticker.startTimer(this.options.interval);
     }
   }, {
     key: "setupCanvas",
@@ -31346,8 +31595,8 @@ function () {
     key: "setupCamera",
     value: function setupCamera() {
       this.camera = new _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__["Camera"]();
-      this.camera.distanceScale = 10000;
-      this.camera.setZoom(16000);
+      this.camera.distanceScale = this.options.distanceScale;
+      this.camera.setZoom(this.options.zoom);
       this.camera.draw(this.canvas);
     }
   }, {
@@ -31355,15 +31604,19 @@ function () {
     value: function setupUniverse() {
       this.universe = new _src_Universe_js__WEBPACK_IMPORTED_MODULE_2__["Universe"](this.canvas.width, this.canvas.height, this.camera.distanceScale);
       this.universe.createBodies();
-      this.camera.setVector(this.universe.center.x, this.universe.center.y);
-      this.centerPlanet();
+      this.camera.setVector(this.universe.center.x, this.universe.center.y); // this.centerPlanet();
+    }
+  }, {
+    key: "setupFleets",
+    value: function setupFleets() {
+      this.fleets = new _src_Fleets_js__WEBPACK_IMPORTED_MODULE_3__["Fleets"]();
     }
   }, {
     key: "setupEmpires",
     value: function setupEmpires() {
-      this.empires = new _src_Empires_js__WEBPACK_IMPORTED_MODULE_4__["Empires"]();
+      this.empires = new _src_Empires_js__WEBPACK_IMPORTED_MODULE_5__["Empires"]();
       this.empires.createEmpires();
-      this.empires.createFleets(this.fleets);
+      this.empires.createFleets(this.universe, this.fleets);
     }
   }, {
     key: "drawUniverse",
@@ -31371,9 +31624,17 @@ function () {
       this.universe.draw(this.canvas, this.camera, this.ticker.time);
     }
   }, {
+    key: "drawFleetLines",
+    value: function drawFleetLines() {
+      // this.fleets.forEach((fleet) => {
+      //     fleet.draw(this.canvas, this.camera, this.ticker.time);
+      // })
+      this.fleets.draw(this.canvas, this.camera, this.ticker.time, 'lines');
+    }
+  }, {
     key: "drawFleets",
     value: function drawFleets() {
-      this.fleets.draw(this.canvas, this.camera, this.ticker.time);
+      this.fleets.draw(this.canvas, this.camera, this.ticker.time, 'fleets');
     }
   }, {
     key: "drawCamera",
@@ -31384,6 +31645,8 @@ function () {
     key: "tick",
     value: function tick() {
       this.ticker.tick();
+      this.fleets.tick(this.universe, this.ticker.time);
+      this.empires.tick(this.universe, this.fleets, this.ticker.time);
       this.render();
     }
   }, {
@@ -31400,7 +31663,9 @@ function () {
     value: function render() {
       this.canvas.clear();
       this.drawCamera();
+      this.drawFleetLines();
       this.drawUniverse();
+      this.drawFleets();
     }
   }, {
     key: "move",
@@ -31437,13 +31702,22 @@ function () {
     key: "centerPlanet",
     value: function centerPlanet() {
       var system = this.universe.getAstro(0);
-      this.camera.vector = new _src_Vector_js__WEBPACK_IMPORTED_MODULE_5__["Vector"](system.vector.x, system.vector.y);
+      this.camera.vector = new _src_Vector_js__WEBPACK_IMPORTED_MODULE_6__["Vector"](system.vector.x, system.vector.y);
       this.render();
     }
   }, {
     key: "centerScreen",
     value: function centerScreen() {
-      this.camera.vector = new _src_Vector_js__WEBPACK_IMPORTED_MODULE_5__["Vector"](this.universe.center.x, this.universe.center.y);
+      this.camera.vector = new _src_Vector_js__WEBPACK_IMPORTED_MODULE_6__["Vector"](this.universe.center.x, this.universe.center.y);
+      this.render();
+    }
+  }, {
+    key: "testFleetLaunch",
+    value: function testFleetLaunch() {
+      var target = this.universe.getStar(1);
+      console.log(target);
+      this.fleets.fleet[0].launchFleet(target.astroID, target, this.ticker.time);
+      console.log(this.fleets.fleet[0]);
       this.render();
     }
   }]);
@@ -31492,7 +31766,7 @@ function () {
     key: "startTimer",
     value: function startTimer() {
       if (this.timer !== null) {
-        clearInterval(this.timer);
+        this.killTimer();
       }
 
       this.timer = setInterval(function () {
@@ -31500,6 +31774,12 @@ function () {
           this.callBack();
         }
       }.bind(this), this.interval);
+    }
+  }, {
+    key: "killTimer",
+    value: function killTimer() {
+      clearInterval(this.timer);
+      this.paused = true;
     }
   }, {
     key: "pause",
@@ -31553,7 +31833,9 @@ function () {
     _classCallCheck(this, Universe);
 
     this.bodies = [];
-    this.maxSolarSystems = 200;
+    this.stars = []; // Array index of stars
+
+    this.maxSolarSystems = 2000;
     this.minBodies = 1;
     this.maxBodies = 5;
     this.maxOrbits = 20;
@@ -31575,7 +31857,8 @@ function () {
     value: function createBodies() {
       for (var s = 1; s <= this.maxSolarSystems; s++) {
         this.createSolarSystem(s);
-      }
+      } // console.log(this.stars);
+
     }
     /**
      *
@@ -31585,19 +31868,26 @@ function () {
   }, {
     key: "createSolarSystem",
     value: function createSolarSystem(systemID) {
-      var star = new _Astro_js__WEBPACK_IMPORTED_MODULE_0__["Astro"]('Star ' + systemID);
-      star.setAsStar();
-      var fn = new _Functions_js__WEBPACK_IMPORTED_MODULE_1__["Functions"](); // star.vector.setVector(this.center.x, this.center.y);
+      var star = this.createStar(systemID);
+      var max = _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(this.maxBodies) + 1;
 
-      star.vector.setVector(fn.rand(this.width), fn.rand(this.height));
-      star.name = this.systemNameGenerator();
-      this.bodies.push(star); // Star
-
-      this.createOrbits();
-
-      for (var b = 1; b <= this.maxBodies; b++) {
+      for (var b = 1; b <= max; b++) {
         this.createPlanet(star, systemID, b);
       }
+    }
+  }, {
+    key: "createStar",
+    value: function createStar(systemID) {
+      var star = new _Astro_js__WEBPACK_IMPORTED_MODULE_0__["Astro"]('Star ' + systemID);
+      star.setAsStar();
+      star.vector.setVector(_Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(this.width), _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(this.height));
+      star.name = this.systemNameGenerator();
+      star.astroID = this.bodies.length;
+      this.bodies.push(star); // Star
+
+      this.stars.push(this.bodies.length - 1);
+      this.createOrbits();
+      return star;
     }
     /**
      *
@@ -31609,14 +31899,14 @@ function () {
   }, {
     key: "createPlanet",
     value: function createPlanet(star, systemID, planetIndex) {
-      var fn = new _Functions_js__WEBPACK_IMPORTED_MODULE_1__["Functions"]();
-      var rand = fn.rand(this.orbits.length);
+      var rand = _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(this.orbits.length);
       var orbit = this.orbits[rand];
       this.removeOrbit(rand);
       var planet = new _Astro_js__WEBPACK_IMPORTED_MODULE_0__["Astro"](star.name + '-' + planetIndex, orbit);
       planet.setAsPlanet();
       planet.setParent(systemID);
       planet.vector.setVector(star.vector.x, star.vector.y);
+      planet.astroID = this.bodies.length - 1;
       this.bodies.push(planet); // Planets
     }
     /**
@@ -31645,18 +31935,27 @@ function () {
   }, {
     key: "getAstro",
     value: function getAstro(id) {
+      if (id > this.bodies.length) {
+        console.log('ERROR: getAstro(), index out of range!');
+        return false;
+      }
+
       return this.bodies[id];
     }
   }, {
     key: "getStar",
     value: function getStar(id) {
-      var astro = this.getAstro(id);
-
-      if (astro.parentId !== 0) {
-        return this.getStar(astro.parentId);
+      if (id > this.stars.length) {
+        console.log('ERROR: getStar(), index out of range!');
+        return false;
       }
 
-      return this.bodies[id];
+      return this.getAstro(this.stars[id]);
+    }
+  }, {
+    key: "captureSystem",
+    value: function captureSystem(systemID, empireID) {
+      this.bodies[systemID].empireID = empireID;
     }
   }, {
     key: "systemNameGenerator",
@@ -31666,15 +31965,14 @@ function () {
       // [Quaduant][Sector]-[System]
       //NOTE: Not using numbers yet and no double name check either.
       var nStr = '';
-      var fn = new _Functions_js__WEBPACK_IMPORTED_MODULE_1__["Functions"]();
+      var letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
 
-      for (var i = 0; i < 4; i++) {
+      for (var i = 0; i <= 4; i++) {
         if (i === 2) {
           nStr += '-';
         }
 
-        var letters = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'X', 'Y', 'Z'];
-        var rand = fn.rand(26);
+        var rand = _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(letters.length);
         nStr += letters[rand];
       }
 
@@ -31820,8 +32118,8 @@ function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
-module.exports = __webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
+module.exports = __webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

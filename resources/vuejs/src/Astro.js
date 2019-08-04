@@ -4,7 +4,8 @@ import {fn} from './Functions.js';
 class Astro {
     constructor(name, orbit) {
         this.name = name || 'Object ' + new Function.rand(10000) + 1;
-        this.empireID = 0;//fn.rand(5)+1;//0;
+        this.empireID = -1;//fn.rand(5)+1;//0;
+        this.astroID = null;
         this.parent = null;
         this.orbit = {
             path: 0, // 1-10 orbit paths
@@ -50,14 +51,6 @@ class Astro {
         return newCoords;
     }
 
-    getEmpireColor(empireID){
-        let color = ['white','red','green','blue','purple','yellow'];
-        if (empireID >= color.length) {
-            console.log('EmpireID out of range');
-        }
-        return color[empireID];
-    }
-
     draw(canvas, camera, time) {
         let coords = this.move(time);
         let color = (this.type === 'star') ? 'yellow' : 'green';
@@ -66,10 +59,8 @@ class Astro {
         let canvasCoords = astroCoords.fitToScreen(canvas, camera);
 
         if (this.type === 'star') {
-
             canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius * (camera.zoom / 10), this.radius+2), 'yellow');
-
-            canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius+5 * (camera.zoom / 10), this.radius+5), 'transparent', this.getEmpireColor(this.empireID));
+            canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius+5 * (camera.zoom / 10), this.radius+5), 'transparent', fn.getEmpireColor(this.empireID));
         }
         if ((camera.zoom > 1000 && this.type === 'planet')) {
             // canvas.drawCircle(coords.x, coords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );

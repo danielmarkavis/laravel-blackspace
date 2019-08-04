@@ -1,65 +1,132 @@
+import {fn} from './Functions.js';
 import {Vector} from './Vector.js';
 
 class Fleet {
 
     /**
-     *
+     * @param astroID
      * @param x
      * @param y
      * @param empireID
      */
-    constructor(x, y, empireID) {
-        this.vector = new Vector(x, y);
-        this.target = new Vector(x, y);
+    constructor(astroID, x, y, empireID) {
+        this.locationVector = new Vector(x, y);
+        this.startVector = new Vector(x, y);
+        this.endVector = new Vector(x, y);
+        this.location = astroID; // index for the astro array
+        this.target = astroID; // index for the astro array
         this.owner = empireID;
-        this.speed = 1;
+        this.speed = 50000;
         this.xp = 0;
         this.launchDate = 0;
+        this.travelTime = 0;
+        this.color = 'white';
     }
 
-    hasArrived() {
-        if (this.target === this.vector) {
-            return true;
-        }
-        if (this.getDistance() <= 0) {
-            this.target = this.vector;
-            return true;
-        }
-        return false;
+    isHome() {
+        return (this.location === this.target);
+    }
+
+    hasArrived(time) {
+        return (this.getTimeToTarget(time) <= 0);
     }
 
     getDistance() {
-        return this.vector.getDistance(this.target.x, this.target.y);
+        return this.locationVector.getDistance(this.endVector.x, this.endVector.y);
     }
 
-    fleetETA(time) {
-        if (this.target === this.vector) {
-            return 0;
-        }
-
+    getArrivalTime() {
+        let distance = this.getDistance();
+        return Math.ceil(distance / this.speed); // Get tick of arrival.
     }
 
-    setTarget(x, y) {
-        this.target.setVector(x, y);
+    getTimeToTarget(time) {
+        return (this.launchDate + this.travelTime) - time;
+    }
+
+    setTarget(astroID, x, y) {
+        this.target = astroID;
+        this.endVector.setVector(x, y);
     }
 
     setSpeed(speed) {
         this.speed = speed;
     }
 
-    /**
-     *
-     * @param target Vector
-     * @param time Integer
-     */
-    launchFleet(target, time) {
-        this.setTarget(target.x, target.y);
-        this.launchDate = time;
+    move(coords, time) {
+        if (this.isHome()) {
+            return coords;
+        }
+        let percentComplete = (time - this.launchDate) / this.travelTime;
+        // console.log('Tick: '+percentComplete+'%, Launched: '+ this.launchDate +', TravelTime: '+ this.travelTime + ', Arrival: ' + (this.launchDate + this.travelTime));
+
+        let relativeVector = new Vector(this.startVector.x - this.endVector.x, this.startVector.y - this.endVector.y);
+
+        relativeVector.x = Math.round(relativeVector.x * percentComplete);
+        relativeVector.y = Math.round(relativeVector.y * percentComplete);
+        // console.log(relativeVector);
+        return new Vector(this.startVector.x - relativeVector.x, this.startVector.y - relativeVector.y);
     }
 
-    draw(canvas) {
-        canvas.drawCircle(this.vector.x, this.vector.y, 2, this.color);
+    /**
+     * @param astroID
+     * @param target
+     * @param time
+     */
+    launchFleet(astroID, target, time) {
+        this.setTarget(astroID, target.vector.x, target.vector.y);
+        this.launchDate = time;
+        this.travelTime = this.getArrivalTime();
+        console.log('Fleet has been launched to target: '+this.travelTime+' weeks');
+        console.log('Distance is '+this.getDistance());
     }
+
+    setArrived() {
+        console.log('Fleet has arrived at target');
+        this.locationVector = new Vector(this.endVector.x,this.endVector.y);
+        this.startVector = new Vector(this.endVector.x,this.endVector.y);
+        this.location = this.target;
+
+    }
+
+    tick(universe, time) {
+        if (this.hasArrived(time) && !this.isHome()) {
+            this.setArrived();
+            console.log(this.owner);
+            let system = universe.getAstro(this.location);
+            universe.captureSystem(system.astroID, this.owner);
+        }
+    }
+
+    draw(canvas, camera, time) {
+        let coords = this.move(this.locationVector, time);
+        let astroCoords = new Vector(coords.x, coords.y);
+        let canvasCoords = astroCoords.fitToScreen(canvas, camera);
+        let offset = 0;
+        if (this.isHome()) {
+            offset = 10;
+        }
+        canvas.fillRect(Math.round(canvasCoords.x-2)+offset, Math.round(canvasCoords.y-2)+offset, 5, 5, fn.getEmpireColor(this.owner));
+    }
+
+    drawLines(canvas, camera) {
+        if (this.hasArrived()) {
+            return;
+        }
+        let fromCoords = new Vector(this.startVector.x, this.startVector.y);
+        let toCoords = new Vector(this.endVector.x, this.endVector.y);
+        let fromCanvasCoords = fromCoords.fitToScreen(canvas, camera);
+        let toCanvasCoords = toCoords.fitToScreen(canvas, camera);
+        canvas.drawLine(
+            Math.round(fromCanvasCoords.x),
+            Math.round(fromCanvasCoords.y),
+            Math.round(toCanvasCoords.x),
+            Math.round(toCanvasCoords.y),
+            'dimgray'
+        );
+        // canvas.fillRect(, 5, 5, this.color);
+    }
+
 }
 
 export {Fleet};

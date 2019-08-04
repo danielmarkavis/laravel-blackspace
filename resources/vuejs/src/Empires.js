@@ -1,35 +1,38 @@
-import {Vector} from './Vector.js';
+// import {Vector} from './Vector.js';
 import {Empire} from './Empire.js';
 
 class Empires {
 
     constructor() {
-        this.maxEmpires = 10;
+        this.maxEmpires = 5;
         this.empires = [];
     }
 
     createEmpires(maxEmpires) {
         let totalEmpires = maxEmpires || this.maxEmpires;
-        for (let e = 1; e <= totalEmpires; e++) {
+        for (let e = 0; e < totalEmpires; e++) {
             this.createEmpire(e);
         }
     }
 
-    createEmpire(id){
+    createEmpire(id) {
         let empire = new Empire(id);
         this.empires.push(empire);
     }
 
-    startSystems(universe) {
-        this.empires.forEach((empire) => {
-            empire.createFleet(fleets, new Vector(0,0));
+    createFleets(universe, fleets) {
+        this.empires.forEach((empire, key) => {
+            let system = universe.getStar(key);
+            // console.log(system);
+            universe.captureSystem(system.astroID, key);
+            empire.createFleet(fleets, key, system.vector);
         })
     }
 
-    createFleets(fleets) {
-        this.empires.forEach((empire) => {
-            empire.createFleet(fleets, new Vector(0,0));
-        })
+    tick(universe, fleets, time) {
+        this.empires.forEach((empire, key) => {
+            empire.tick(universe, fleets, time);
+        });
     }
 }
 
