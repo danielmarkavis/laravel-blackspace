@@ -15,8 +15,8 @@ class Fleet {
         this.endVector = new Vector(x, y);
         this.location = astroID; // index for the astro array
         this.target = astroID; // index for the astro array
-        this.owner = empireID;
-        this.speed = 50000;
+        this.empireID = empireID;
+        this.speed = 500000;
         this.xp = 0;
         this.launchDate = 0;
         this.travelTime = 0;
@@ -78,7 +78,7 @@ class Fleet {
         this.launchDate = time;
         this.travelTime = this.getArrivalTime();
         console.log('Fleet has been launched to target: '+this.travelTime+' weeks');
-        console.log('Distance is '+this.getDistance());
+        // console.log('Distance is '+this.getDistance());
     }
 
     setArrived() {
@@ -92,9 +92,10 @@ class Fleet {
     tick(universe, time) {
         if (this.hasArrived(time) && !this.isHome()) {
             this.setArrived();
-            console.log(this.owner);
+            // console.log(this.empireID);
             let system = universe.getAstro(this.location);
-            universe.captureSystem(system.astroID, this.owner);
+            universe.captureSystem(system.astroID, this.empireID);
+            this.xp = this.xp+10;
         }
     }
 
@@ -106,7 +107,7 @@ class Fleet {
         if (this.isHome()) {
             offset = 10;
         }
-        canvas.fillRect(Math.round(canvasCoords.x-2)+offset, Math.round(canvasCoords.y-2)+offset, 5, 5, fn.getEmpireColor(this.owner));
+        canvas.fillRect(Math.round(canvasCoords.x-2)+offset, Math.round(canvasCoords.y-2)+offset, 5, 5, fn.getEmpireColor(this.empireID));
     }
 
     drawLines(canvas, camera) {

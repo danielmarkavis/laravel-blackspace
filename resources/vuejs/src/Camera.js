@@ -34,7 +34,7 @@ class Camera {
 
     moveLeft() {
         this.vector.moveLeft(this.moveStep);
-        console.log(this.moveStep);
+        // console.log(this.moveStep);
     }
 
     moveRight() {
@@ -50,10 +50,8 @@ class Camera {
     }
 
     draw(canvas) {
-        canvas.drawLine(canvas.center.x, 0, canvas.center.x, canvas.center.y-20, 'grey');
-
-        canvas.drawLine(canvas.center.x, canvas.center.y+20, canvas.center.x, canvas.height, 'grey');
-        // canvas.drawCircle(canvas.center.x, canvas.center.y, 2, this.color);
+        // canvas.drawLine(canvas.center.x, 0, canvas.center.x, canvas.center.y-20, 'grey');
+        // canvas.drawLine(canvas.center.x, canvas.center.y+20, canvas.center.x, canvas.height, 'grey');
     }
 }
 

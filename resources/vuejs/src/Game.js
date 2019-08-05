@@ -27,7 +27,7 @@ class Game {
         this.empires = [];
         this.paused = true;
         this.options = {
-            'distanceScale': 10000,
+            'distanceScale': 1000,
             'zoom': 1,
             'interval': 1,
         };
@@ -70,7 +70,7 @@ class Game {
 
     setupEmpires() {
         this.empires = new Empires();
-        this.empires.createEmpires();
+        this.empires.createEmpires(this.universe);
         this.empires.createFleets(this.universe, this.fleets);
     }
 
@@ -79,9 +79,6 @@ class Game {
     }
 
     drawFleetLines() {
-        // this.fleets.forEach((fleet) => {
-        //     fleet.draw(this.canvas, this.camera, this.ticker.time);
-        // })
         this.fleets.draw(this.canvas, this.camera, this.ticker.time, 'lines');
     }
 
@@ -154,9 +151,7 @@ class Game {
 
     testFleetLaunch() {
         let target = this.universe.getStar(1);
-        console.log(target);
         this.fleets.fleet[0].launchFleet(target.astroID, target, this.ticker.time);
-        console.log(this.fleets.fleet[0]);
         this.render();
     }
 }

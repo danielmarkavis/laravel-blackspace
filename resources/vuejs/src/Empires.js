@@ -8,24 +8,24 @@ class Empires {
         this.empires = [];
     }
 
-    createEmpires(maxEmpires) {
+    createEmpires(universe, maxEmpires) {
         let totalEmpires = maxEmpires || this.maxEmpires;
         for (let e = 0; e < totalEmpires; e++) {
-            this.createEmpire(e);
+            let homePlanet = universe.getStar(e);
+            this.createEmpire(e, homePlanet);
         }
     }
 
-    createEmpire(id) {
-        let empire = new Empire(id);
+    createEmpire(id, homePlanet) {
+        let empire = new Empire(id, homePlanet);
         this.empires.push(empire);
     }
 
     createFleets(universe, fleets) {
         this.empires.forEach((empire, key) => {
-            let system = universe.getStar(key);
-            // console.log(system);
-            universe.captureSystem(system.astroID, key);
-            empire.createFleet(fleets, key, system.vector);
+            // let system = universe.getStar(key);
+            universe.captureSystem(empire.homePlanet.astroID, key);
+            empire.createFleet(fleets, key, empire.homePlanet.vector);
         })
     }
 

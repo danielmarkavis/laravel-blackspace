@@ -122,6 +122,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'Overview',
@@ -18312,6 +18313,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.newGame()
@@ -18324,6 +18326,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.toggle()
@@ -18336,6 +18339,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.tick()
@@ -18348,6 +18352,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.move("in")
@@ -18360,6 +18365,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.move("out")
@@ -18372,6 +18378,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.move("left")
@@ -18384,6 +18391,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.move("right")
@@ -18396,6 +18404,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.move("up")
@@ -18408,6 +18417,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.move("down")
@@ -18420,6 +18430,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.centerPlanet()
@@ -18432,6 +18443,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.centerScreen()
@@ -18444,6 +18456,7 @@ var render = function() {
           _c(
             "button",
             {
+              staticClass: "btn btn-primary",
               on: {
                 click: function($event) {
                   return _vm.game.testFleetLaunch()
@@ -18451,6 +18464,19 @@ var render = function() {
               }
             },
             [_vm._v("Launch")]
+          ),
+          _vm._v(" "),
+          _c(
+            "button",
+            {
+              staticClass: "btn btn-primary",
+              on: {
+                click: function($event) {
+                  return _vm.game.render()
+                }
+              }
+            },
+            [_vm._v("Force Render")]
           )
         ])
       : _vm._e()
@@ -30838,8 +30864,7 @@ function () {
   }, {
     key: "moveLeft",
     value: function moveLeft() {
-      this.vector.moveLeft(this.moveStep);
-      console.log(this.moveStep);
+      this.vector.moveLeft(this.moveStep); // console.log(this.moveStep);
     }
   }, {
     key: "moveRight",
@@ -30858,9 +30883,8 @@ function () {
     }
   }, {
     key: "draw",
-    value: function draw(canvas) {
-      canvas.drawLine(canvas.center.x, 0, canvas.center.x, canvas.center.y - 20, 'grey');
-      canvas.drawLine(canvas.center.x, canvas.center.y + 20, canvas.center.x, canvas.height, 'grey'); // canvas.drawCircle(canvas.center.x, canvas.center.y, 2, this.color);
+    value: function draw(canvas) {// canvas.drawLine(canvas.center.x, 0, canvas.center.x, canvas.center.y-20, 'grey');
+      // canvas.drawLine(canvas.center.x, canvas.center.y+20, canvas.center.x, canvas.height, 'grey');
     }
   }]);
 
@@ -31025,13 +31049,15 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 var Empire =
 /*#__PURE__*/
 function () {
-  function Empire(empireID, name) {
+  function Empire(empireID, homePlanet, name) {
     _classCallCheck(this, Empire);
 
     this.name = name || 'Empire ' + _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(10000) + 1;
     this.empireID = empireID;
     this.astroOwned = [];
     this.fleets = [];
+    this.maxFleets = 10;
+    this.homePlanet = homePlanet;
   }
 
   _createClass(Empire, [{
@@ -31051,23 +31077,64 @@ function () {
      */
 
   }, {
-    key: "botFindTargetClosest",
-    value: function botFindTargetClosest(universe, fleet) {
+    key: "botFindTargetClosestHomePlanet",
+    value: function botFindTargetClosestHomePlanet(universe, fleet) {
       var target = null;
       var i = 0;
       var currentDistance = null;
+      var starID = null;
+      var system = null;
+      var distance = null;
 
       while (i < 100) {
         i++;
-        var planetID = _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(universe.stars.length);
-        var system = universe.getStar(planetID);
-        var distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y);
+        starID = _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(universe.stars.length);
+        system = universe.getStar(starID); // console.log(system);
+
+        distance = this.homePlanet.vector.getDistance(system.vector.x, system.vector.y);
 
         if (currentDistance === null) {
           currentDistance = distance;
         }
 
-        if (system.owner !== this.empireID) {
+        if (system.empireID !== this.empireID) {
+          if (distance < currentDistance && distance !== 0) {
+            target = system;
+            currentDistance = distance;
+          }
+        }
+      }
+
+      return target;
+    }
+    /**
+     *
+     * @param universe
+     * @param fleet
+     * @returns {null}
+     */
+
+  }, {
+    key: "botFindTargetClosest",
+    value: function botFindTargetClosest(universe, fleet) {
+      var i = 0;
+      var currentDistance = null;
+      var starID = null;
+      var target = null;
+      var system = null;
+      var distance = null;
+
+      while (i < 100) {
+        i++;
+        starID = _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(universe.stars.length);
+        system = universe.getStar(starID);
+        distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y);
+
+        if (currentDistance === null) {
+          currentDistance = distance;
+        }
+
+        if (system.empireID !== this.empireID) {
           if (distance < currentDistance) {
             target = system;
             currentDistance = distance;
@@ -31095,7 +31162,7 @@ function () {
         var planetID = _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(universe.stars.length);
         var system = universe.getStar(planetID);
 
-        if (system.owner !== this.empireID) {
+        if (system.empireID !== this.empireID) {
           target = system;
         }
       }
@@ -31109,11 +31176,28 @@ function () {
 
       this.fleets.forEach(function (fleetID) {
         if (fleets.fleet[fleetID].isHome()) {
-          var target = _this.botFindTargetClosest(universe, fleets.fleet[fleetID]);
+          var target = _this.botFindTargetClosestHomePlanet(universe, fleets.fleet[fleetID]);
 
-          if (target && fleets.fleet[fleetID].location !== target.astroID) {
+          if (target !== null) {
             fleets.fleet[fleetID].launchFleet(target.astroID, target, time);
           }
+        }
+      });
+    }
+  }, {
+    key: "xpCheck",
+    value: function xpCheck(universe, fleets, time) {
+      var _this2 = this;
+
+      if (this.fleets.length >= this.maxFleets) {
+        return;
+      }
+
+      this.fleets.forEach(function (fleetID) {
+        if (fleets.fleet[fleetID].xp > 1000) {
+          fleets.fleet[fleetID].xp = 0;
+
+          _this2.createFleet(fleets, _this2.homePlanet.astroID, _this2.homePlanet.vector);
         }
       });
     }
@@ -31121,6 +31205,7 @@ function () {
     key: "tick",
     value: function tick(universe, fleets, time) {
       this.botLaunchFleet(universe, fleets, time);
+      this.xpCheck(universe, fleets, time);
     }
   }]);
 
@@ -31163,27 +31248,27 @@ function () {
 
   _createClass(Empires, [{
     key: "createEmpires",
-    value: function createEmpires(maxEmpires) {
+    value: function createEmpires(universe, maxEmpires) {
       var totalEmpires = maxEmpires || this.maxEmpires;
 
       for (var e = 0; e < totalEmpires; e++) {
-        this.createEmpire(e);
+        var homePlanet = universe.getStar(e);
+        this.createEmpire(e, homePlanet);
       }
     }
   }, {
     key: "createEmpire",
-    value: function createEmpire(id) {
-      var empire = new _Empire_js__WEBPACK_IMPORTED_MODULE_0__["Empire"](id);
+    value: function createEmpire(id, homePlanet) {
+      var empire = new _Empire_js__WEBPACK_IMPORTED_MODULE_0__["Empire"](id, homePlanet);
       this.empires.push(empire);
     }
   }, {
     key: "createFleets",
     value: function createFleets(universe, fleets) {
       this.empires.forEach(function (empire, key) {
-        var system = universe.getStar(key); // console.log(system);
-
-        universe.captureSystem(system.astroID, key);
-        empire.createFleet(fleets, key, system.vector);
+        // let system = universe.getStar(key);
+        universe.captureSystem(empire.homePlanet.astroID, key);
+        empire.createFleet(fleets, key, empire.homePlanet.vector);
       });
     }
   }, {
@@ -31242,8 +31327,8 @@ function () {
 
     this.target = astroID; // index for the astro array
 
-    this.owner = empireID;
-    this.speed = 50000;
+    this.empireID = empireID;
+    this.speed = 500000;
     this.xp = 0;
     this.launchDate = 0;
     this.travelTime = 0;
@@ -31314,8 +31399,7 @@ function () {
       this.setTarget(astroID, target.vector.x, target.vector.y);
       this.launchDate = time;
       this.travelTime = this.getArrivalTime();
-      console.log('Fleet has been launched to target: ' + this.travelTime + ' weeks');
-      console.log('Distance is ' + this.getDistance());
+      console.log('Fleet has been launched to target: ' + this.travelTime + ' weeks'); // console.log('Distance is '+this.getDistance());
     }
   }, {
     key: "setArrived",
@@ -31329,10 +31413,11 @@ function () {
     key: "tick",
     value: function tick(universe, time) {
       if (this.hasArrived(time) && !this.isHome()) {
-        this.setArrived();
-        console.log(this.owner);
+        this.setArrived(); // console.log(this.empireID);
+
         var system = universe.getAstro(this.location);
-        universe.captureSystem(system.astroID, this.owner);
+        universe.captureSystem(system.astroID, this.empireID);
+        this.xp = this.xp + 10;
       }
     }
   }, {
@@ -31347,7 +31432,7 @@ function () {
         offset = 10;
       }
 
-      canvas.fillRect(Math.round(canvasCoords.x - 2) + offset, Math.round(canvasCoords.y - 2) + offset, 5, 5, _Functions_js__WEBPACK_IMPORTED_MODULE_0__["fn"].getEmpireColor(this.owner));
+      canvas.fillRect(Math.round(canvasCoords.x - 2) + offset, Math.round(canvasCoords.y - 2) + offset, 5, 5, _Functions_js__WEBPACK_IMPORTED_MODULE_0__["fn"].getEmpireColor(this.empireID));
     }
   }, {
     key: "drawLines",
@@ -31567,7 +31652,7 @@ function () {
       this.empires = [];
       this.paused = true;
       this.options = {
-        'distanceScale': 10000,
+        'distanceScale': 1000,
         'zoom': 1,
         'interval': 1
       };
@@ -31615,7 +31700,7 @@ function () {
     key: "setupEmpires",
     value: function setupEmpires() {
       this.empires = new _src_Empires_js__WEBPACK_IMPORTED_MODULE_5__["Empires"]();
-      this.empires.createEmpires();
+      this.empires.createEmpires(this.universe);
       this.empires.createFleets(this.universe, this.fleets);
     }
   }, {
@@ -31626,9 +31711,6 @@ function () {
   }, {
     key: "drawFleetLines",
     value: function drawFleetLines() {
-      // this.fleets.forEach((fleet) => {
-      //     fleet.draw(this.canvas, this.camera, this.ticker.time);
-      // })
       this.fleets.draw(this.canvas, this.camera, this.ticker.time, 'lines');
     }
   }, {
@@ -31715,9 +31797,7 @@ function () {
     key: "testFleetLaunch",
     value: function testFleetLaunch() {
       var target = this.universe.getStar(1);
-      console.log(target);
       this.fleets.fleet[0].launchFleet(target.astroID, target, this.ticker.time);
-      console.log(this.fleets.fleet[0]);
       this.render();
     }
   }]);
@@ -32118,8 +32198,8 @@ function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
-module.exports = __webpack_require__(/*! C:\wamp64\www\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
+module.exports = __webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
