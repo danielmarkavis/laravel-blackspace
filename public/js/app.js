@@ -30803,6 +30803,160 @@ function () {
 
 /***/ }),
 
+/***/ "./resources/vuejs/src/Bot.js":
+/*!************************************!*\
+  !*** ./resources/vuejs/src/Bot.js ***!
+  \************************************/
+/*! exports provided: Bot */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Bot", function() { return Bot; });
+/* harmony import */ var _Functions__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Functions */ "./resources/vuejs/src/Functions.js");
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
+
+function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
+
+var Bot =
+/*#__PURE__*/
+function () {
+  function Bot(empireID, homePlanet) {
+    _classCallCheck(this, Bot);
+
+    this.empireID = empireID;
+    this.homePlanet = homePlanet;
+  }
+  /**
+   *
+   * @param universe
+   * @param fleet
+   * @returns {null}
+   */
+
+
+  _createClass(Bot, [{
+    key: "botFindTargetClosestHomePlanet",
+    value: function botFindTargetClosestHomePlanet(universe, fleet) {
+      var target = null;
+      var i = 0;
+      var currentDistance = null;
+      var starID = null;
+      var system = null;
+      var distance = null;
+
+      while (i < 100) {
+        i++;
+        starID = _Functions__WEBPACK_IMPORTED_MODULE_0__["fn"].rand(universe.stars.length);
+        system = universe.getStar(starID);
+        distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y) + this.homePlanet.vector.getDistance(system.vector.x, system.vector.y);
+
+        if (distance === 0) {
+          // Ignore planet currently orbiting.
+          continue;
+        }
+
+        if (currentDistance === null) {
+          currentDistance = distance;
+        }
+
+        if (distance < currentDistance) {
+          if (system.empireID !== this.empireID) {
+            currentDistance = distance;
+            target = system;
+          }
+        }
+      }
+
+      return target;
+    }
+    /**
+     *
+     * @param universe
+     * @param fleet
+     * @returns {null}
+     */
+    // botFindTargetClosest(universe, fleet) {
+    //     let i = 0;
+    //     let currentDistance = null;
+    //     let starID = null;
+    //     let target = null;
+    //     let system = null;
+    //     let distance = null;
+    //     while(i < 100) {
+    //         i++;
+    //         starID = fn.rand(universe.stars.length);
+    //         system = universe.getStar(starID);
+    //         distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y);
+    //         if (currentDistance === null) {
+    //             currentDistance = distance;
+    //         }
+    //         if (system.empireID !== this.empireID) {
+    //             if (distance < currentDistance) {
+    //                 target = system;
+    //                 currentDistance = distance;
+    //             }
+    //         }
+    //     }
+    //     return target;
+    // }
+
+    /**
+     * Target star, if:
+     * Target is not me
+     * @param universe
+     * @returns {null}
+     */
+    // botFindTarget(universe) {
+    //     let target = null;
+    //     let i = 0;
+    //     while((target === null) && (i < (universe.bodies.length)*2)) {
+    //         i++;
+    //         let planetID = fn.rand(universe.stars.length);
+    //         let system = universe.getStar(planetID);
+    //         if (system.empireID !== this.empireID) {
+    //             target = system;
+    //         }
+    //     }
+    //     return target;
+    // }
+
+    /**
+     *
+     * @param universe
+     * @param fleets
+     * @param fleetIndexes
+     * @param time
+     */
+
+  }, {
+    key: "botLaunchFleet",
+    value: function botLaunchFleet(universe, fleets, fleetIndexes, time) {
+      var _this = this;
+
+      fleetIndexes.forEach(function (fleetID) {
+        if (fleets.fleet[fleetID].isHome()) {
+          var target = _this.botFindTargetClosestHomePlanet(universe, fleets.fleet[fleetID]);
+
+          if (target !== null) {
+            fleets.fleet[fleetID].launchFleet(target.astroID, target, time);
+          }
+        }
+      });
+    }
+  }]);
+
+  return Bot;
+}();
+
+
+
+/***/ }),
+
 /***/ "./resources/vuejs/src/Camera.js":
 /*!***************************************!*\
   !*** ./resources/vuejs/src/Camera.js ***!
@@ -30833,7 +30987,7 @@ function () {
     this.vector = new _Vector_js__WEBPACK_IMPORTED_MODULE_0__["Vector"](0, 0);
     this.zoomStep = 2;
     this.maxZoom = 10000;
-    this.moveStep = 100 * this.distanceScale;
+    this.moveStep = 10 * this.distanceScale;
     this.color = 'blue';
   }
 
@@ -31033,15 +31187,13 @@ function () {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Empire", function() { return Empire; });
-/* harmony import */ var _Vector_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Vector.js */ "./resources/vuejs/src/Vector.js");
-/* harmony import */ var _Fleet_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Fleet.js */ "./resources/vuejs/src/Fleet.js");
-/* harmony import */ var _Functions_js__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./Functions.js */ "./resources/vuejs/src/Functions.js");
+/* harmony import */ var _Bot_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Bot.js */ "./resources/vuejs/src/Bot.js");
+/* harmony import */ var _Functions_js__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./Functions.js */ "./resources/vuejs/src/Functions.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
-
 
 
 
@@ -31052,12 +31204,13 @@ function () {
   function Empire(empireID, homePlanet, name) {
     _classCallCheck(this, Empire);
 
-    this.name = name || 'Empire ' + _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(10000) + 1;
+    this.name = name || 'Empire ' + _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(10000) + 1;
     this.empireID = empireID;
     this.astroOwned = [];
     this.fleets = [];
-    this.maxFleets = 10;
+    this.maxFleets = 50;
     this.homePlanet = homePlanet;
+    this.bot = new _Bot_js__WEBPACK_IMPORTED_MODULE_0__["Bot"](empireID, homePlanet);
   }
 
   _createClass(Empire, [{
@@ -31069,142 +31222,30 @@ function () {
   }, {
     key: "update",
     value: function update() {}
-    /**
-     *
-     * @param universe
-     * @param fleet
-     * @returns {null}
-     */
-
-  }, {
-    key: "botFindTargetClosestHomePlanet",
-    value: function botFindTargetClosestHomePlanet(universe, fleet) {
-      var target = null;
-      var i = 0;
-      var currentDistance = null;
-      var starID = null;
-      var system = null;
-      var distance = null;
-
-      while (i < 100) {
-        i++;
-        starID = _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(universe.stars.length);
-        system = universe.getStar(starID); // console.log(system);
-
-        distance = this.homePlanet.vector.getDistance(system.vector.x, system.vector.y);
-
-        if (currentDistance === null) {
-          currentDistance = distance;
-        }
-
-        if (system.empireID !== this.empireID) {
-          if (distance < currentDistance && distance !== 0) {
-            target = system;
-            currentDistance = distance;
-          }
-        }
-      }
-
-      return target;
-    }
-    /**
-     *
-     * @param universe
-     * @param fleet
-     * @returns {null}
-     */
-
-  }, {
-    key: "botFindTargetClosest",
-    value: function botFindTargetClosest(universe, fleet) {
-      var i = 0;
-      var currentDistance = null;
-      var starID = null;
-      var target = null;
-      var system = null;
-      var distance = null;
-
-      while (i < 100) {
-        i++;
-        starID = _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(universe.stars.length);
-        system = universe.getStar(starID);
-        distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y);
-
-        if (currentDistance === null) {
-          currentDistance = distance;
-        }
-
-        if (system.empireID !== this.empireID) {
-          if (distance < currentDistance) {
-            target = system;
-            currentDistance = distance;
-          }
-        }
-      }
-
-      return target;
-    }
-    /**
-     * Target star, if:
-     * Target is not me
-     * @param universe
-     * @returns {null}
-     */
-
-  }, {
-    key: "botFindTarget",
-    value: function botFindTarget(universe) {
-      var target = null;
-      var i = 0;
-
-      while (target === null && i < universe.bodies.length * 2) {
-        i++;
-        var planetID = _Functions_js__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(universe.stars.length);
-        var system = universe.getStar(planetID);
-
-        if (system.empireID !== this.empireID) {
-          target = system;
-        }
-      }
-
-      return target;
-    }
-  }, {
-    key: "botLaunchFleet",
-    value: function botLaunchFleet(universe, fleets, time) {
-      var _this = this;
-
-      this.fleets.forEach(function (fleetID) {
-        if (fleets.fleet[fleetID].isHome()) {
-          var target = _this.botFindTargetClosestHomePlanet(universe, fleets.fleet[fleetID]);
-
-          if (target !== null) {
-            fleets.fleet[fleetID].launchFleet(target.astroID, target, time);
-          }
-        }
-      });
-    }
   }, {
     key: "xpCheck",
     value: function xpCheck(universe, fleets, time) {
-      var _this2 = this;
-
-      if (this.fleets.length >= this.maxFleets) {
-        return;
-      }
+      var _this = this;
 
       this.fleets.forEach(function (fleetID) {
         if (fleets.fleet[fleetID].xp > 1000) {
           fleets.fleet[fleetID].xp = 0;
 
-          _this2.createFleet(fleets, _this2.homePlanet.astroID, _this2.homePlanet.vector);
+          if (fleets.fleet[fleetID].rank < fleets.fleet[fleetID].maxRank) {
+            fleets.fleet[fleetID].rank++;
+          } // fleets.fleet[fleetID].speed += 1000;
+
+
+          if (_this.fleets.length <= _this.maxFleets) {
+            _this.createFleet(fleets, _this.homePlanet.astroID, _this.homePlanet.vector);
+          }
         }
       });
     }
   }, {
     key: "tick",
     value: function tick(universe, fleets, time) {
-      this.botLaunchFleet(universe, fleets, time);
+      this.bot.botLaunchFleet(universe, fleets, this.fleets, time);
       this.xpCheck(universe, fleets, time);
     }
   }]);
@@ -31242,7 +31283,7 @@ function () {
   function Empires() {
     _classCallCheck(this, Empires);
 
-    this.maxEmpires = 5;
+    this.maxEmpires = 7;
     this.empires = [];
   }
 
@@ -31328,8 +31369,10 @@ function () {
     this.target = astroID; // index for the astro array
 
     this.empireID = empireID;
-    this.speed = 500000;
+    this.speed = 1000;
     this.xp = 0;
+    this.rank = 1;
+    this.maxRank = 10;
     this.launchDate = 0;
     this.travelTime = 0;
     this.color = 'white';
@@ -31354,7 +31397,7 @@ function () {
     key: "getArrivalTime",
     value: function getArrivalTime() {
       var distance = this.getDistance();
-      return Math.ceil(distance / this.speed); // Get tick of arrival.
+      return Math.ceil(distance / (this.speed * this.rank)); // Get tick of arrival.
     }
   }, {
     key: "getTimeToTarget",
@@ -31387,6 +31430,23 @@ function () {
 
       return new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](this.startVector.x - relativeVector.x, this.startVector.y - relativeVector.y);
     }
+  }, {
+    key: "tick",
+    value: function tick(universe, time) {
+      if (this.hasArrived(time) && !this.isHome()) {
+        this.setArrived(); // console.log(this.empireID);
+
+        var system = universe.getAstro(this.location);
+
+        if (system.empireID !== -1 && system.empireID !== this.empireID) {
+          this.addXP(500);
+        } else {
+          this.addXP(100);
+        }
+
+        universe.captureSystem(system.astroID, this.empireID);
+      }
+    }
     /**
      * @param astroID
      * @param target
@@ -31410,15 +31470,9 @@ function () {
       this.location = this.target;
     }
   }, {
-    key: "tick",
-    value: function tick(universe, time) {
-      if (this.hasArrived(time) && !this.isHome()) {
-        this.setArrived(); // console.log(this.empireID);
-
-        var system = universe.getAstro(this.location);
-        universe.captureSystem(system.astroID, this.empireID);
-        this.xp = this.xp + 10;
-      }
+    key: "addXP",
+    value: function addXP(xp) {
+      this.xp = this.xp + xp;
     }
   }, {
     key: "draw",

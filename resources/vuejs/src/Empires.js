@@ -4,7 +4,7 @@ import {Empire} from './Empire.js';
 class Empires {
 
     constructor() {
-        this.maxEmpires = 5;
+        this.maxEmpires = 7;
         this.empires = [];
     }
 

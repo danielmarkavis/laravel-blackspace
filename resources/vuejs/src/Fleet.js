@@ -16,8 +16,10 @@ class Fleet {
         this.location = astroID; // index for the astro array
         this.target = astroID; // index for the astro array
         this.empireID = empireID;
-        this.speed = 500000;
+        this.speed = 1000;
         this.xp = 0;
+        this.rank = 1;
+        this.maxRank = 10;
         this.launchDate = 0;
         this.travelTime = 0;
         this.color = 'white';
@@ -37,7 +39,7 @@ class Fleet {
 
     getArrivalTime() {
         let distance = this.getDistance();
-        return Math.ceil(distance / this.speed); // Get tick of arrival.
+        return Math.ceil(distance / (this.speed * this.rank)); // Get tick of arrival.
     }
 
     getTimeToTarget(time) {
@@ -68,6 +70,21 @@ class Fleet {
         return new Vector(this.startVector.x - relativeVector.x, this.startVector.y - relativeVector.y);
     }
 
+    tick(universe, time) {
+        if (this.hasArrived(time) && !this.isHome()) {
+            this.setArrived();
+            // console.log(this.empireID);
+            let system = universe.getAstro(this.location);
+            if (system.empireID !== -1 && system.empireID !== this.empireID) {
+                this.addXP(500);
+            } else {
+                this.addXP(100);
+            }
+            universe.captureSystem(system.astroID, this.empireID);
+        }
+    }
+
+
     /**
      * @param astroID
      * @param target
@@ -89,14 +106,8 @@ class Fleet {
 
     }
 
-    tick(universe, time) {
-        if (this.hasArrived(time) && !this.isHome()) {
-            this.setArrived();
-            // console.log(this.empireID);
-            let system = universe.getAstro(this.location);
-            universe.captureSystem(system.astroID, this.empireID);
-            this.xp = this.xp+10;
-        }
+    addXP(xp) {
+        this.xp = this.xp + xp;
     }
 
     draw(canvas, camera, time) {
