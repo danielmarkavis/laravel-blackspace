@@ -5,7 +5,7 @@ class Universe {
     constructor(width, height, distanceScale) {
         this.bodies = [];
         this.stars = []; // Array index of stars
-        this.maxSolarSystems = 2000;
+        this.maxSolarSystems = 200;
         this.minBodies = 1;
         this.maxBodies = 5;
         this.maxOrbits = 20;
@@ -108,6 +108,12 @@ class Universe {
 
     captureSystem(systemID, empireID) {
         this.bodies[systemID].empireID = empireID;
+        this.bodies[systemID].homePlanet = false;
+    }
+
+    claimHomePlanet(systemID, empireID) {
+        this.bodies[systemID].empireID = empireID;
+        this.bodies[systemID].homePlanet = true;
     }
 
     systemNameGenerator() {

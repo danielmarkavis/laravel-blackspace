@@ -30834,14 +30834,16 @@ function () {
   /**
    *
    * @param universe
+   * @param fleets
    * @param fleet
+   * @param empireFleets
    * @returns {null}
    */
 
 
   _createClass(Bot, [{
     key: "botFindTargetClosestHomePlanet",
-    value: function botFindTargetClosestHomePlanet(universe, fleet) {
+    value: function botFindTargetClosestHomePlanet(universe, fleets, fleet, empireFleets) {
       var target = null;
       var i = 0;
       var currentDistance = null;
@@ -30880,31 +30882,42 @@ function () {
      * @param fleet
      * @returns {null}
      */
-    // botFindTargetClosest(universe, fleet) {
-    //     let i = 0;
-    //     let currentDistance = null;
-    //     let starID = null;
-    //     let target = null;
-    //     let system = null;
-    //     let distance = null;
-    //     while(i < 100) {
-    //         i++;
-    //         starID = fn.rand(universe.stars.length);
-    //         system = universe.getStar(starID);
-    //         distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y);
-    //         if (currentDistance === null) {
-    //             currentDistance = distance;
-    //         }
-    //         if (system.empireID !== this.empireID) {
-    //             if (distance < currentDistance) {
-    //                 target = system;
-    //                 currentDistance = distance;
-    //             }
-    //         }
-    //     }
-    //     return target;
-    // }
 
+  }, {
+    key: "botFindTargetClosestFleet",
+    value: function botFindTargetClosestFleet(universe, fleet, empireFleets) {
+      var target = null;
+      var i = 0;
+      var currentDistance = null;
+      var starID = null;
+      var system = null;
+      var distance = null;
+
+      while (i < 100) {
+        i++;
+        starID = _Functions__WEBPACK_IMPORTED_MODULE_0__["fn"].rand(universe.stars.length);
+        system = universe.getStar(starID);
+        distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y);
+
+        if (distance === 0) {
+          // Ignore planet currently orbiting.
+          continue;
+        }
+
+        if (currentDistance === null) {
+          currentDistance = distance;
+        }
+
+        if (distance < currentDistance) {
+          if (system.empireID !== this.empireID) {
+            currentDistance = distance;
+            target = system;
+          }
+        }
+      }
+
+      return target;
+    }
     /**
      * Target star, if:
      * Target is not me
@@ -30929,24 +30942,30 @@ function () {
      *
      * @param universe
      * @param fleets
-     * @param fleetIndexes
+     * @param fleet
      * @param time
      */
 
   }, {
     key: "botLaunchFleet",
-    value: function botLaunchFleet(universe, fleets, fleetIndexes, time) {
-      var _this = this;
+    value: function botLaunchFleet(universe, fleets, fleet, empireFleets, time) {
+      if (fleet.isHome()) {
+        var target = null;
 
-      fleetIndexes.forEach(function (fleetID) {
-        if (fleets.fleet[fleetID].isHome()) {
-          var target = _this.botFindTargetClosestHomePlanet(universe, fleets.fleet[fleetID]);
+        switch (fleet.path) {
+          case 1:
+            target = this.botFindTargetClosestHomePlanet(universe, fleets, fleet, empireFleets);
+            break;
 
-          if (target !== null) {
-            fleets.fleet[fleetID].launchFleet(target.astroID, target, time);
-          }
+          case 2:
+            target = this.botFindTargetClosestFleet(universe, fleets, fleet, empireFleets);
+            break;
         }
-      });
+
+        if (target !== null) {
+          fleet.launchFleet(target.astroID, target, time);
+        }
+      }
     }
   }]);
 
@@ -31215,8 +31234,8 @@ function () {
 
   _createClass(Empire, [{
     key: "createFleet",
-    value: function createFleet(fleets, astroID, target) {
-      var fleetID = fleets.addFleet(astroID, target.x, target.y, this.empireID);
+    value: function createFleet(fleets, target) {
+      var fleetID = fleets.addFleet(target.astroID, target.vector.x, target.vector.y, this.empireID);
       this.fleets.push(fleetID);
     }
   }, {
@@ -31224,29 +31243,57 @@ function () {
     value: function update() {}
   }, {
     key: "xpCheck",
-    value: function xpCheck(universe, fleets, time) {
-      var _this = this;
+    value: function xpCheck(universe, fleets, fleet) {
+      if (fleet.xp >= fleet.maxXP) {
+        fleet.xp = 0;
 
-      this.fleets.forEach(function (fleetID) {
-        if (fleets.fleet[fleetID].xp > 1000) {
-          fleets.fleet[fleetID].xp = 0;
+        if (fleet.rank < fleet.maxRank) {
+          fleet.rank++;
+        }
 
-          if (fleets.fleet[fleetID].rank < fleets.fleet[fleetID].maxRank) {
-            fleets.fleet[fleetID].rank++;
-          } // fleets.fleet[fleetID].speed += 1000;
+        if (this.fleets.length <= this.maxFleets) {
+          this.createFleet(fleets, this.homePlanet);
 
-
-          if (_this.fleets.length <= _this.maxFleets) {
-            _this.createFleet(fleets, _this.homePlanet.astroID, _this.homePlanet.vector);
+          if (this.homePlanet.empireID === this.empireID) {
+            this.createFleet(fleets, this.homePlanet);
+          } else {
+            var system = universe.getAstro(fleet.location);
+            this.createFleet(fleets, system);
           }
         }
+      }
+    }
+  }, {
+    key: "battleCheck",
+    value: function battleCheck(universe, fleets, fleet) {
+      if (fleet.hp <= 0) {
+        fleet.resetFleet(fleets, this.homePlanet);
+      }
+    }
+  }, {
+    key: "getCurrentTargets",
+    value: function getCurrentTargets() {
+      var targets = [];
+      this.fleets.forEach(function (fleetID) {
+        targets.push();
       });
+      return targets;
     }
   }, {
     key: "tick",
     value: function tick(universe, fleets, time) {
-      this.bot.botLaunchFleet(universe, fleets, this.fleets, time);
-      this.xpCheck(universe, fleets, time);
+      var _this = this;
+
+      var currentTargets = this.getCurrentTargets();
+      this.fleets.forEach(function (fleetID) {
+        if (_Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(100) < 15) {
+          _this.bot.botLaunchFleet(universe, fleets, fleets.fleet[fleetID], currentTargets, time);
+        }
+
+        _this.xpCheck(universe, fleets, fleets.fleet[fleetID]);
+
+        _this.battleCheck(universe, fleets, fleets.fleet[fleetID]);
+      });
     }
   }]);
 
@@ -31283,7 +31330,7 @@ function () {
   function Empires() {
     _classCallCheck(this, Empires);
 
-    this.maxEmpires = 7;
+    this.maxEmpires = 6;
     this.empires = [];
   }
 
@@ -31309,7 +31356,7 @@ function () {
       this.empires.forEach(function (empire, key) {
         // let system = universe.getStar(key);
         universe.captureSystem(empire.homePlanet.astroID, key);
-        empire.createFleet(fleets, key, empire.homePlanet.vector);
+        empire.createFleet(fleets, empire.homePlanet);
       });
     }
   }, {
@@ -31371,10 +31418,13 @@ function () {
     this.empireID = empireID;
     this.speed = 1000;
     this.xp = 0;
+    this.maxXP = 10000;
+    this.hp = 100;
     this.rank = 1;
     this.maxRank = 10;
     this.launchDate = 0;
     this.travelTime = 0;
+    this.path = _Functions_js__WEBPACK_IMPORTED_MODULE_0__["fn"].rand(2) + 1;
     this.color = 'white';
   }
 
@@ -31434,18 +31484,33 @@ function () {
     key: "tick",
     value: function tick(universe, time) {
       if (this.hasArrived(time) && !this.isHome()) {
-        this.setArrived(); // console.log(this.empireID);
-
+        this.setArrived();
         var system = universe.getAstro(this.location);
 
         if (system.empireID !== -1 && system.empireID !== this.empireID) {
           this.addXP(500);
+          this.damageFleet(5);
         } else {
           this.addXP(100);
         }
 
         universe.captureSystem(system.astroID, this.empireID);
       }
+    }
+  }, {
+    key: "resetFleet",
+    value: function resetFleet(fleets, homePlanet) {
+      this.locationVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](homePlanet.vector.x, homePlanet.vector.y);
+      this.startVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](homePlanet.vector.x, homePlanet.vector.y);
+      this.endVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](homePlanet.vector.x, homePlanet.vector.y);
+      this.location = homePlanet.astroID; // index for the astro array
+
+      this.target = homePlanet.astroID; // index for the astro array
+
+      this.rank = 1;
+      this.xp = 0;
+      this.hp = 100;
+      this.path = _Functions_js__WEBPACK_IMPORTED_MODULE_0__["fn"].rand(2) + 1;
     }
     /**
      * @param astroID
@@ -31458,13 +31523,12 @@ function () {
     value: function launchFleet(astroID, target, time) {
       this.setTarget(astroID, target.vector.x, target.vector.y);
       this.launchDate = time;
-      this.travelTime = this.getArrivalTime();
-      console.log('Fleet has been launched to target: ' + this.travelTime + ' weeks'); // console.log('Distance is '+this.getDistance());
+      this.travelTime = this.getArrivalTime(); // console.log('Fleet has been launched to target: '+this.travelTime+' weeks');
     }
   }, {
     key: "setArrived",
     value: function setArrived() {
-      console.log('Fleet has arrived at target');
+      // console.log('Fleet has arrived at target');
       this.locationVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](this.endVector.x, this.endVector.y);
       this.startVector = new _Vector_js__WEBPACK_IMPORTED_MODULE_1__["Vector"](this.endVector.x, this.endVector.y);
       this.location = this.target;
@@ -31472,7 +31536,20 @@ function () {
   }, {
     key: "addXP",
     value: function addXP(xp) {
-      this.xp = this.xp + xp;
+      this.xp += xp;
+
+      if (this.xp > this.maxXP) {
+        this.xp = this.maxXP;
+      }
+    }
+  }, {
+    key: "damageFleet",
+    value: function damageFleet(damage) {
+      this.hp -= damage;
+
+      if (this.hp < 0) {
+        this.hp = 0;
+      }
     }
   }, {
     key: "draw",
@@ -31969,7 +32046,7 @@ function () {
     this.bodies = [];
     this.stars = []; // Array index of stars
 
-    this.maxSolarSystems = 2000;
+    this.maxSolarSystems = 200;
     this.minBodies = 1;
     this.maxBodies = 5;
     this.maxOrbits = 20;
@@ -32090,6 +32167,13 @@ function () {
     key: "captureSystem",
     value: function captureSystem(systemID, empireID) {
       this.bodies[systemID].empireID = empireID;
+      this.bodies[systemID].homePlanet = false;
+    }
+  }, {
+    key: "claimHomePlanet",
+    value: function claimHomePlanet(systemID, empireID) {
+      this.bodies[systemID].empireID = empireID;
+      this.bodies[systemID].homePlanet = true;
     }
   }, {
     key: "systemNameGenerator",

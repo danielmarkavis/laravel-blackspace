@@ -13,33 +13,56 @@ class Empire {
         this.bot = new Bot(empireID,homePlanet);
     }
 
-    createFleet(fleets, astroID, target) {
-        let fleetID = fleets.addFleet(astroID, target.x, target.y, this.empireID);
+    createFleet(fleets, target) {
+        let fleetID = fleets.addFleet(target.astroID, target.vector.x, target.vector.y, this.empireID);
         this.fleets.push(fleetID);
     }
 
     update() {
     }
 
-    xpCheck(universe, fleets, time) {
-        this.fleets.forEach( (fleetID) => {
-            if (fleets.fleet[fleetID].xp > 1000) {
-                fleets.fleet[fleetID].xp = 0;
-                if (fleets.fleet[fleetID].rank < fleets.fleet[fleetID].maxRank) {
-                    fleets.fleet[fleetID].rank++;
-                }
+    xpCheck(universe, fleets, fleet) {
+        if (fleet.xp >= fleet.maxXP) {
+            fleet.xp = 0;
+            if (fleet.rank < fleet.maxRank) {
+                fleet.rank++;
+            }
 
-                // fleets.fleet[fleetID].speed += 1000;
-                if (this.fleets.length <= this.maxFleets) {
-                    this.createFleet(fleets, this.homePlanet.astroID, this.homePlanet.vector);
+            if (this.fleets.length <= this.maxFleets) {
+                this.createFleet(fleets, this.homePlanet);
+                if (this.homePlanet.empireID === this.empireID) {
+                    this.createFleet(fleets, this.homePlanet);
+                } else {
+                    let system = universe.getAstro(fleet.location);
+                    this.createFleet(fleets, system);
                 }
             }
+        }
+    }
+
+    battleCheck(universe, fleets, fleet) {
+        if (fleet.hp <= 0) {
+            fleet.resetFleet(fleets, this.homePlanet);
+        }
+    }
+
+    getCurrentTargets() {
+        let targets = [];
+        this.fleets.forEach( (fleetID) => {
+            targets.push();
         });
+        return targets;
     }
 
     tick(universe, fleets, time) {
-        this.bot.botLaunchFleet(universe, fleets, this.fleets, time);
-        this.xpCheck(universe, fleets, time);
+        let currentTargets = this.getCurrentTargets();
+        this.fleets.forEach( (fleetID) => {
+            if (fn.rand(100) < 15) {
+                this.bot.botLaunchFleet(universe, fleets, fleets.fleet[fleetID], currentTargets, time);
+            }
+            this.xpCheck(universe, fleets, fleets.fleet[fleetID]);
+            this.battleCheck(universe, fleets, fleets.fleet[fleetID]);
+        });
     }
 }
 

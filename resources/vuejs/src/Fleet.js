@@ -18,10 +18,13 @@ class Fleet {
         this.empireID = empireID;
         this.speed = 1000;
         this.xp = 0;
+        this.maxXP = 10000;
+        this.hp = 100;
         this.rank = 1;
         this.maxRank = 10;
         this.launchDate = 0;
         this.travelTime = 0;
+        this.path = fn.rand(2)+1;
         this.color = 'white';
     }
 
@@ -73,10 +76,10 @@ class Fleet {
     tick(universe, time) {
         if (this.hasArrived(time) && !this.isHome()) {
             this.setArrived();
-            // console.log(this.empireID);
             let system = universe.getAstro(this.location);
             if (system.empireID !== -1 && system.empireID !== this.empireID) {
                 this.addXP(500);
+                this.damageFleet(5);
             } else {
                 this.addXP(100);
             }
@@ -84,6 +87,18 @@ class Fleet {
         }
     }
 
+
+    resetFleet(fleets, homePlanet) {
+        this.locationVector = new Vector(homePlanet.vector.x, homePlanet.vector.y);
+        this.startVector = new Vector(homePlanet.vector.x, homePlanet.vector.y);
+        this.endVector = new Vector(homePlanet.vector.x, homePlanet.vector.y);
+        this.location = homePlanet.astroID; // index for the astro array
+        this.target = homePlanet.astroID; // index for the astro array
+        this.rank = 1;
+        this.xp = 0;
+        this.hp = 100;
+        this.path = fn.rand(2)+1;
+    }
 
     /**
      * @param astroID
@@ -94,12 +109,11 @@ class Fleet {
         this.setTarget(astroID, target.vector.x, target.vector.y);
         this.launchDate = time;
         this.travelTime = this.getArrivalTime();
-        console.log('Fleet has been launched to target: '+this.travelTime+' weeks');
-        // console.log('Distance is '+this.getDistance());
+        // console.log('Fleet has been launched to target: '+this.travelTime+' weeks');
     }
 
     setArrived() {
-        console.log('Fleet has arrived at target');
+        // console.log('Fleet has arrived at target');
         this.locationVector = new Vector(this.endVector.x,this.endVector.y);
         this.startVector = new Vector(this.endVector.x,this.endVector.y);
         this.location = this.target;
@@ -107,7 +121,15 @@ class Fleet {
     }
 
     addXP(xp) {
-        this.xp = this.xp + xp;
+        this.xp += xp;
+        if (this.xp > this.maxXP) {
+            this.xp = this.maxXP;
+        }
+    }
+
+    damageFleet(damage) {
+        this.hp -= damage;
+        if (this.hp < 0) { this.hp = 0; }
     }
 
     draw(canvas, camera, time) {

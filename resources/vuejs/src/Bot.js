@@ -9,10 +9,12 @@ class Bot {
     /**
      *
      * @param universe
+     * @param fleets
      * @param fleet
+     * @param empireFleets
      * @returns {null}
      */
-    botFindTargetClosestHomePlanet(universe, fleet) {
+    botFindTargetClosestHomePlanet(universe, fleets, fleet, empireFleets) {
         let target = null;
         let i = 0;
         let currentDistance = null;
@@ -46,30 +48,33 @@ class Bot {
      * @param fleet
      * @returns {null}
      */
-    // botFindTargetClosest(universe, fleet) {
-    //     let i = 0;
-    //     let currentDistance = null;
-    //     let starID = null;
-    //     let target = null;
-    //     let system = null;
-    //     let distance = null;
-    //     while(i < 100) {
-    //         i++;
-    //         starID = fn.rand(universe.stars.length);
-    //         system = universe.getStar(starID);
-    //         distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y);
-    //         if (currentDistance === null) {
-    //             currentDistance = distance;
-    //         }
-    //         if (system.empireID !== this.empireID) {
-    //             if (distance < currentDistance) {
-    //                 target = system;
-    //                 currentDistance = distance;
-    //             }
-    //         }
-    //     }
-    //     return target;
-    // }
+    botFindTargetClosestFleet(universe, fleet, empireFleets) {
+        let target = null;
+        let i = 0;
+        let currentDistance = null;
+        let starID = null;
+        let system = null;
+        let distance = null;
+        while(i < 100) {
+            i++;
+            starID = fn.rand(universe.stars.length);
+            system = universe.getStar(starID);
+            distance = fleet.locationVector.getDistance(system.vector.x, system.vector.y);
+            if (distance === 0) { // Ignore planet currently orbiting.
+                continue;
+            }
+            if (currentDistance === null) {
+                currentDistance = distance;
+            }
+            if (distance < currentDistance) {
+                if (system.empireID !== this.empireID) {
+                    currentDistance = distance;
+                    target = system;
+                }
+            }
+        }
+        return target;
+    }
 
     /**
      * Target star, if:
@@ -95,18 +100,24 @@ class Bot {
      *
      * @param universe
      * @param fleets
-     * @param fleetIndexes
+     * @param fleet
      * @param time
      */
-    botLaunchFleet(universe, fleets, fleetIndexes, time) {
-        fleetIndexes.forEach( (fleetID) => {
-            if (fleets.fleet[fleetID].isHome()) {
-                let target = this.botFindTargetClosestHomePlanet(universe, fleets.fleet[fleetID]);
-                if (target !== null) {
-                    fleets.fleet[fleetID].launchFleet(target.astroID, target, time);
-                }
+    botLaunchFleet(universe, fleets, fleet, empireFleets, time) {
+        if (fleet.isHome()) {
+            let target = null;
+            switch(fleet.path) {
+                case 1:
+                    target = this.botFindTargetClosestHomePlanet(universe, fleets, fleet, empireFleets);
+                    break;
+                case 2:
+                    target = this.botFindTargetClosestFleet(universe, fleets, fleet, empireFleets);
+                    break;
             }
-        });
+            if (target !== null) {
+                fleet.launchFleet(target.astroID, target, time);
+            }
+        }
     }
 
 }
