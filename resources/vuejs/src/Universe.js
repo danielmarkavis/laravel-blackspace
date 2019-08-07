@@ -5,9 +5,9 @@ class Universe {
     constructor(width, height, distanceScale) {
         this.bodies = [];
         this.stars = []; // Array index of stars
-        this.maxSolarSystems = 200;
-        this.minBodies = 1;
-        this.maxBodies = 5;
+        this.maxSolarSystems = 10;
+        this.minBodies = 0;
+        this.maxBodies = 0;
         this.maxOrbits = 20;
         this.width = (width * distanceScale) || 1280;
         this.height = (height * distanceScale) || 720;
@@ -34,6 +34,9 @@ class Universe {
      */
     createSolarSystem(systemID) {
         let star = this.createStar(systemID);
+        if (this.maxBodies <= 0) {
+            return;
+        }
         let max = fn.rand(this.maxBodies)+1;
         for (let b = 1; b <= max; b++) {
             this.createPlanet(star, systemID, b);

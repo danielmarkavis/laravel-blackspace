@@ -13,9 +13,9 @@ class Fleets {
         return this.fleet.length - 1;
     }
 
-    tick(universe, time) {
+    tick(universe, empires, time) {
         this.fleet.forEach((fleet) => {
-            fleet.tick(universe, time);
+            fleet.tick(universe, empires, time);
         });
     }
 

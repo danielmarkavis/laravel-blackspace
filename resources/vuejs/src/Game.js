@@ -47,14 +47,12 @@ class Game {
 
     setupCanvas() {
         this.canvas = new Canvas("my-canvas", {width: 1280, height: 720});
-        this.canvas.render();
     }
 
     setupCamera() {
         this.camera = new Camera();
         this.camera.distanceScale = this.options.distanceScale;
         this.camera.setZoom(this.options.zoom);
-        this.camera.draw(this.canvas);
     }
 
     setupUniverse() {
@@ -90,13 +88,27 @@ class Game {
         this.camera.draw(this.canvas);
     }
 
+    render() {
+        this.canvas.clear();
+        // this.drawCamera();
+        this.drawFleetLines();
+        this.drawUniverse();
+        this.drawFleets();
+    }
+
     tick() {
         this.ticker.tick();
-        this.fleets.tick(this.universe, this.ticker.time);
+        this.fleets.tick(this.universe, this.empires, this.ticker.time);
         this.empires.tick(this.universe, this.fleets, this.ticker.time);
         this.render();
     }
 
+    setInterval(value) {
+        this.ticker.interval = value;
+        this.ticker.killTimer();
+        this.ticker.startTimer();
+        this.play(true);
+    }
 
     play($status) {
         if ($status) {
@@ -104,14 +116,6 @@ class Game {
         } else {
             this.ticker.pause();
         }
-    }
-
-    render() {
-        this.canvas.clear();
-        this.drawCamera();
-        this.drawFleetLines();
-        this.drawUniverse();
-        this.drawFleets();
     }
 
     move(direction) {

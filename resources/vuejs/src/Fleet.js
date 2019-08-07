@@ -16,9 +16,9 @@ class Fleet {
         this.location = astroID; // index for the astro array
         this.target = astroID; // index for the astro array
         this.empireID = empireID;
-        this.speed = 1000;
+        this.speed = 1000 + fn.rand(1000);
         this.xp = 0;
-        this.maxXP = 10000;
+        this.maxXP = 1000;
         this.hp = 100;
         this.rank = 1;
         this.maxRank = 10;
@@ -49,9 +49,9 @@ class Fleet {
         return (this.launchDate + this.travelTime) - time;
     }
 
-    setTarget(astroID, x, y) {
-        this.target = astroID;
-        this.endVector.setVector(x, y);
+    setTarget(target) {
+        this.target = target.astroID;
+        this.endVector.setVector(target.vector.x, target.vector.y);
     }
 
     setSpeed(speed) {
@@ -63,8 +63,6 @@ class Fleet {
             return coords;
         }
         let percentComplete = (time - this.launchDate) / this.travelTime;
-        // console.log('Tick: '+percentComplete+'%, Launched: '+ this.launchDate +', TravelTime: '+ this.travelTime + ', Arrival: ' + (this.launchDate + this.travelTime));
-
         let relativeVector = new Vector(this.startVector.x - this.endVector.x, this.startVector.y - this.endVector.y);
 
         relativeVector.x = Math.round(relativeVector.x * percentComplete);
@@ -73,7 +71,7 @@ class Fleet {
         return new Vector(this.startVector.x - relativeVector.x, this.startVector.y - relativeVector.y);
     }
 
-    tick(universe, time) {
+    tick(universe, empires, time) {
         if (this.hasArrived(time) && !this.isHome()) {
             this.setArrived();
             let system = universe.getAstro(this.location);
@@ -83,7 +81,12 @@ class Fleet {
             } else {
                 this.addXP(100);
             }
+            if (system.empireID !== -1) {
+                empires.getEmpire(system.empireID).removeSystem(system.astroID);
+            }
             universe.captureSystem(system.astroID, this.empireID);
+
+            empires.getEmpire(this.empireID).addSystem(system.astroID);
         }
     }
 
@@ -105,8 +108,8 @@ class Fleet {
      * @param target
      * @param time
      */
-    launchFleet(astroID, target, time) {
-        this.setTarget(astroID, target.vector.x, target.vector.y);
+    launchFleet(target, time) {
+        this.setTarget(target);
         this.launchDate = time;
         this.travelTime = this.getArrivalTime();
         // console.log('Fleet has been launched to target: '+this.travelTime+' weeks');
@@ -156,9 +159,8 @@ class Fleet {
             Math.round(fromCanvasCoords.y),
             Math.round(toCanvasCoords.x),
             Math.round(toCanvasCoords.y),
-            'dimgray'
+            fn.getEmpireColor(this.empireID)
         );
-        // canvas.fillRect(, 5, 5, this.color);
     }
 
 }

@@ -3,7 +3,7 @@ class Ticker {
     constructor(interval, callBack) {
         this.time = 0;
         this.timer = null;
-        this.paused = true;
+        this.playing = false;
         this.interval = interval || 100; //100ms
         this.callBack = callBack;
     }
@@ -16,7 +16,7 @@ class Ticker {
             this.killTimer();
         }
         this.timer = setInterval(function () {
-            if (!this.paused) {
+            if (this.playing) {
                 this.callBack();
             }
         }.bind(this), this.interval);
@@ -24,13 +24,13 @@ class Ticker {
 
     killTimer() {
         clearInterval(this.timer);
-        this.paused = true;
+        this.playing = false;
     }
     pause() {
-        this.paused = true;
+        this.playing = false;
     }
     play() {
-        this.paused = false
+        this.playing = true;
     }
 
     tick() {

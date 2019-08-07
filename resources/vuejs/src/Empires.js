@@ -4,7 +4,7 @@ import {Empire} from './Empire.js';
 class Empires {
 
     constructor() {
-        this.maxEmpires = 6;
+        this.maxEmpires = 2;
         this.empires = [];
     }
 
@@ -23,14 +23,17 @@ class Empires {
 
     createFleets(universe, fleets) {
         this.empires.forEach((empire, key) => {
-            // let system = universe.getStar(key);
             universe.captureSystem(empire.homePlanet.astroID, key);
             empire.createFleet(fleets, empire.homePlanet);
         })
     }
 
+    getEmpire(empireID) {
+        return this.empires[empireID];
+    }
+
     tick(universe, fleets, time) {
-        this.empires.forEach((empire, key) => {
+        this.empires.forEach((empire) => {
             empire.tick(universe, fleets, time);
         });
     }

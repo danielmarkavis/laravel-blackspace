@@ -7,26 +7,34 @@ class Canvas {
     constructor(element, resolution) {
         this.element = element;
         this.canvas = null;
-        this.ctx = null;
         this.width = resolution.width || 1280;
         this.height = resolution.height || 720;
+        this.ctx = null;
+        this.buffer = new OffscreenCanvas(this.width, this.height);
         this.center = {
             x: Math.round(resolution.width / 2),
             y: Math.round(resolution.height / 2)
         };
         this.layers = []; // Fleet lines -> planets -> ships
+
+        this.setup();
     }
 
     clear() {
         this.fillRect(0,0,this.canvas.width, this.canvas.height, 'black');
     }
 
-    render() {
+    setup() {
         this.canvas = document.getElementById(this.element);
-        this.ctx = this.canvas.getContext("2d");
         this.canvas.width = this.width;
         this.canvas.height = this.height;
+
+        this.ctx = this.canvas.getContext("2d");
         this.clear();
+    }
+
+    flip() {
+        this.canvas.draw();
     }
 
     fillRect(x,y,w,h,color) {
