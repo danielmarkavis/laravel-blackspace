@@ -6,9 +6,9 @@ class Empire {
     constructor(empireID, homePlanet, name) {
         this.name = name || 'Empire ' + fn.rand(10000) + 1;
         this.empireID = empireID;
-        this.astroOwned = [];
+        this.astroOwned = {};
         this.fleets = [];
-        this.maxFleets = 50;
+        this.maxFleets = 20;
         this.homePlanet = homePlanet;
         this.bot = new Bot(empireID,homePlanet);
         this.currentTargets = [];
@@ -65,11 +65,11 @@ class Empire {
     }
 
     addSystem(systemID) {
-        this.astroOwned[systemID] = true;
+        this.astroOwned['s'+systemID] = true;
     }
 
     removeSystem(systemID) {
-        this.astroOwned.splice(systemID);
+        delete this.astroOwned['s'+systemID];
     }
 
     tick(universe, fleets, time) {
@@ -86,6 +86,11 @@ class Empire {
             this.xpCheck(universe, fleets, fleets.fleet[fleetID]);
             this.battleCheck(universe, fleets, fleets.fleet[fleetID]);
         });
+    }
+
+    draw(canvas, universe, offset) {
+        let length = Object.keys(this.astroOwned).length / universe.bodies.length;
+        canvas.fillRect(5, 5+(offset*10), 600 * length, 5, fn.getEmpireColor(this.empireID));
     }
 }
 

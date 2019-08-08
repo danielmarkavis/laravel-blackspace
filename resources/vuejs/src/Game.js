@@ -84,23 +84,30 @@ class Game {
         this.fleets.draw(this.canvas, this.camera, this.ticker.time, 'fleets');
     }
 
+    drawEmpires() {
+        this.empires.draw(this.canvas, this.universe);
+    }
+
     drawCamera() {
         this.camera.draw(this.canvas);
     }
 
-    render() {
-        this.canvas.clear();
-        // this.drawCamera();
-        this.drawFleetLines();
-        this.drawUniverse();
-        this.drawFleets();
+    render(forceRender) {
+        if (this.canvas.canRender(this.ticker.time) || forceRender) {
+            this.canvas.clear();
+            // this.drawCamera();
+            this.drawFleetLines();
+            this.drawUniverse();
+            this.drawFleets();
+            this.drawEmpires();
+        }
     }
 
-    tick() {
+    tick(forceRender) {
         this.ticker.tick();
         this.fleets.tick(this.universe, this.empires, this.ticker.time);
         this.empires.tick(this.universe, this.fleets, this.ticker.time);
-        this.render();
+        this.render(forceRender || false);
     }
 
     setInterval(value) {

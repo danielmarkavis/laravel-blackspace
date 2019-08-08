@@ -13,7 +13,7 @@
                     <div v-if="game">
                         <button class="btn btn-primary" @click="game.newGame()">New</button>
                         <button class="btn btn-primary" @click="toggle()"> <span v-if="playing"><i class="fas fa-stop"></i></span> <span v-show="!playing"><i class="fas fa-play"></i></span></button>
-                        <button class="btn btn-primary" @click="game.tick()">Tick: {{game.ticker.time}}</button>
+                        <button class="btn btn-primary" @click="game.tick({'forceRender':true})">Tick: {{game.ticker.time}}</button>
                         <!--            <button @click="game.play(false)">Pause</button>-->
                         <button class="btn btn-primary" @click="game.setInterval(100)"><i class="fas fa-chevron-right"></i></button>
                         <button class="btn btn-primary" @click="game.setInterval(50)"><i class="fas fa-chevron-right"></i><i class="fas fa-chevron-right"></i></button>

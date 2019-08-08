@@ -4,7 +4,7 @@ import {Empire} from './Empire.js';
 class Empires {
 
     constructor() {
-        this.maxEmpires = 2;
+        this.maxEmpires = 6;
         this.empires = [];
     }
 
@@ -24,6 +24,7 @@ class Empires {
     createFleets(universe, fleets) {
         this.empires.forEach((empire, key) => {
             universe.captureSystem(empire.homePlanet.astroID, key);
+            this.getEmpire(key).addSystem(empire.homePlanet.astroID);
             empire.createFleet(fleets, empire.homePlanet);
         })
     }
@@ -35,6 +36,12 @@ class Empires {
     tick(universe, fleets, time) {
         this.empires.forEach((empire) => {
             empire.tick(universe, fleets, time);
+        });
+    }
+
+    draw(canvas, universe) {
+        this.empires.forEach((empire,key) => {
+            empire.draw(canvas, universe, key);
         });
     }
 }

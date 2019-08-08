@@ -16,6 +16,7 @@ class Canvas {
             y: Math.round(resolution.height / 2)
         };
         this.layers = []; // Fleet lines -> planets -> ships
+        this.drawTick = 10;
 
         this.setup();
     }
@@ -90,6 +91,10 @@ class Canvas {
             return false;
         }
         return true;
+    }
+
+    canRender(time) {
+        return (time % this.drawTick) ===  0;
     }
 }
 

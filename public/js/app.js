@@ -28036,7 +28036,7 @@ var render = function() {
                     staticClass: "btn btn-primary",
                     on: {
                       click: function($event) {
-                        return _vm.game.tick()
+                        return _vm.game.tick({ forceRender: true })
                       }
                     }
                   },
@@ -40841,6 +40841,7 @@ function () {
     };
     this.layers = []; // Fleet lines -> planets -> ships
 
+    this.drawTick = 10;
     this.setup();
   }
 
@@ -40929,6 +40930,11 @@ function () {
 
       return true;
     }
+  }, {
+    key: "canRender",
+    value: function canRender(time) {
+      return time % this.drawTick === 0;
+    }
   }]);
 
   return Canvas;
@@ -40967,9 +40973,9 @@ function () {
 
     this.name = name || 'Empire ' + _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(10000) + 1;
     this.empireID = empireID;
-    this.astroOwned = [];
+    this.astroOwned = {};
     this.fleets = [];
-    this.maxFleets = 50;
+    this.maxFleets = 20;
     this.homePlanet = homePlanet;
     this.bot = new _Bot_js__WEBPACK_IMPORTED_MODULE_0__["Bot"](empireID, homePlanet);
     this.currentTargets = [];
@@ -41033,12 +41039,12 @@ function () {
   }, {
     key: "addSystem",
     value: function addSystem(systemID) {
-      this.astroOwned[systemID] = true;
+      this.astroOwned['s' + systemID] = true;
     }
   }, {
     key: "removeSystem",
     value: function removeSystem(systemID) {
-      this.astroOwned.splice(systemID);
+      delete this.astroOwned['s' + systemID];
     }
   }, {
     key: "tick",
@@ -41060,6 +41066,12 @@ function () {
 
         _this.battleCheck(universe, fleets, fleets.fleet[fleetID]);
       });
+    }
+  }, {
+    key: "draw",
+    value: function draw(canvas, universe, offset) {
+      var length = Object.keys(this.astroOwned).length / universe.bodies.length;
+      canvas.fillRect(5, 5 + offset * 10, 600 * length, 5, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireColor(this.empireID));
     }
   }]);
 
@@ -41096,7 +41108,7 @@ function () {
   function Empires() {
     _classCallCheck(this, Empires);
 
-    this.maxEmpires = 2;
+    this.maxEmpires = 6;
     this.empires = [];
   }
 
@@ -41119,8 +41131,13 @@ function () {
   }, {
     key: "createFleets",
     value: function createFleets(universe, fleets) {
+      var _this = this;
+
       this.empires.forEach(function (empire, key) {
         universe.captureSystem(empire.homePlanet.astroID, key);
+
+        _this.getEmpire(key).addSystem(empire.homePlanet.astroID);
+
         empire.createFleet(fleets, empire.homePlanet);
       });
     }
@@ -41134,6 +41151,13 @@ function () {
     value: function tick(universe, fleets, time) {
       this.empires.forEach(function (empire) {
         empire.tick(universe, fleets, time);
+      });
+    }
+  }, {
+    key: "draw",
+    value: function draw(canvas, universe) {
+      this.empires.forEach(function (empire, key) {
+        empire.draw(canvas, universe, key);
       });
     }
   }]);
@@ -41622,26 +41646,34 @@ function () {
       this.fleets.draw(this.canvas, this.camera, this.ticker.time, 'fleets');
     }
   }, {
+    key: "drawEmpires",
+    value: function drawEmpires() {
+      this.empires.draw(this.canvas, this.universe);
+    }
+  }, {
     key: "drawCamera",
     value: function drawCamera() {
       this.camera.draw(this.canvas);
     }
   }, {
     key: "render",
-    value: function render() {
-      this.canvas.clear(); // this.drawCamera();
+    value: function render(forceRender) {
+      if (this.canvas.canRender(this.ticker.time) || forceRender) {
+        this.canvas.clear(); // this.drawCamera();
 
-      this.drawFleetLines();
-      this.drawUniverse();
-      this.drawFleets();
+        this.drawFleetLines();
+        this.drawUniverse();
+        this.drawFleets();
+        this.drawEmpires();
+      }
     }
   }, {
     key: "tick",
-    value: function tick() {
+    value: function tick(forceRender) {
       this.ticker.tick();
       this.fleets.tick(this.universe, this.empires, this.ticker.time);
       this.empires.tick(this.universe, this.fleets, this.ticker.time);
-      this.render();
+      this.render(forceRender || false);
     }
   }, {
     key: "setInterval",
@@ -41826,12 +41858,13 @@ function () {
     this.bodies = [];
     this.stars = []; // Array index of stars
 
-    this.maxSolarSystems = 10;
+    this.maxSolarSystems = 1000;
     this.minBodies = 0;
     this.maxBodies = 0;
     this.maxOrbits = 20;
-    this.width = width * distanceScale || 1280;
-    this.height = height * distanceScale || 720;
+    this.border = 100;
+    this.width = (width - this.border) * distanceScale || 1280;
+    this.height = (height - this.border) * distanceScale || 720;
     this.orbits = [];
     this.center = {
       'x': this.width / 2,

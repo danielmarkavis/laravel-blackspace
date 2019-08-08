@@ -5,12 +5,13 @@ class Universe {
     constructor(width, height, distanceScale) {
         this.bodies = [];
         this.stars = []; // Array index of stars
-        this.maxSolarSystems = 10;
+        this.maxSolarSystems = 1000;
         this.minBodies = 0;
         this.maxBodies = 0;
         this.maxOrbits = 20;
-        this.width = (width * distanceScale) || 1280;
-        this.height = (height * distanceScale) || 720;
+        this.border = 100;
+        this.width = ((width-this.border) * distanceScale) || 1280;
+        this.height = ((height-this.border) * distanceScale) || 720;
         this.orbits = [];
         this.center = {
             'x': this.width / 2,
