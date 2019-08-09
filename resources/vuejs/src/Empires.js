@@ -4,12 +4,16 @@ import {Empire} from './Empire.js';
 class Empires {
 
     constructor() {
-        this.maxEmpires = 6;
+        this.minEmpires = 2;
+        this.maxEmpires = 7;
         this.empires = [];
     }
 
     createEmpires(universe, maxEmpires) {
-        let totalEmpires = maxEmpires || this.maxEmpires;
+        let totalEmpires = maxEmpires || this.minEmpires;
+        if (totalEmpires > this.maxEmpires) {
+            totalEmpires = this.maxEmpires;
+        }
         for (let e = 0; e < totalEmpires; e++) {
             let homePlanet = universe.getStar(e);
             this.createEmpire(e, homePlanet);
@@ -17,8 +21,17 @@ class Empires {
     }
 
     createEmpire(id, homePlanet) {
+        if (this.empires.length > this.minEmpires) {
+            this.minEmpires++;
+        }
+        if (this.minEmpires >= this.maxEmpires) {
+            console.log('Max Empires Reached!');
+            return false;
+        }
+
         let empire = new Empire(id, homePlanet);
         this.empires.push(empire);
+        return true;
     }
 
     createFleets(universe, fleets) {

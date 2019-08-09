@@ -9797,6 +9797,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   name: 'Overview',
@@ -28217,6 +28218,19 @@ var render = function() {
                     }
                   },
                   [_vm._v("Force Render")]
+                ),
+                _vm._v(" "),
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-primary",
+                    on: {
+                      click: function($event) {
+                        return _vm.game.createEmpire()
+                      }
+                    }
+                  },
+                  [_vm._v("New Empire")]
                 )
               ])
             : _vm._e()
@@ -40979,6 +40993,8 @@ function () {
     this.homePlanet = homePlanet;
     this.bot = new _Bot_js__WEBPACK_IMPORTED_MODULE_0__["Bot"](empireID, homePlanet);
     this.currentTargets = [];
+    this.credits = 0;
+    this.fleetCost = 10000;
   }
 
   _createClass(Empire, [{
@@ -40995,15 +41011,31 @@ function () {
 
         if (fleet.rank < fleet.maxRank) {
           fleet.rank++;
-        }
+        } // if (this.fleets.length <= this.maxFleets) {
+        //     if (this.homePlanet.empireID === this.empireID) {
+        //         this.createFleet(fleets, this.homePlanet);
+        //     } else {
+        //         let system = universe.getAstro(fleet.location);
+        //         this.createFleet(fleets, system);
+        //     }
+        // }
+
+      }
+    }
+  }, {
+    key: "buyFleet",
+    value: function buyFleet(universe, fleets, fleet) {
+      if (this.credits >= this.fleetCost) {
+        this.credits -= this.fleetCost;
 
         if (this.fleets.length <= this.maxFleets) {
           if (this.homePlanet.empireID === this.empireID) {
             this.createFleet(fleets, this.homePlanet);
-          } else {
-            var system = universe.getAstro(fleet.location);
-            this.createFleet(fleets, system);
-          }
+          } // else {
+          //     let system = universe.getAstro(fleet.location);
+          //     this.createFleet(fleets, system);
+          // }
+
         }
       }
     }
@@ -41027,13 +41059,12 @@ function () {
     key: "checkHomePlanet",
     value: function checkHomePlanet(universe) {
       if (this.homePlanet.empireID !== this.empireID) {
-        var newHomePlanetID = _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(this.astroOwned.length - 1);
-        console.log(newHomePlanetID);
-        console.log(this.astroOwned);
-        console.log(this.astroOwned[newHomePlanetID]);
-        this.homePlanet = universe.getAstro(this.astroOwned[newHomePlanetID]);
-        console.log(this.homePlanet);
-        console.log(this.name + ' has moved home planet');
+        var newHomePlanetID = _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].rand(this.astroOwned.length - 1); // console.log(newHomePlanetID);
+        // console.log(this.astroOwned);
+        // console.log(this.astroOwned[newHomePlanetID]);
+
+        this.homePlanet = universe.getAstro(this.astroOwned[newHomePlanetID]); // console.log(this.homePlanet);
+        // console.log(this.name+' has moved home planet');
       }
     }
   }, {
@@ -41045,6 +41076,11 @@ function () {
     key: "removeSystem",
     value: function removeSystem(systemID) {
       delete this.astroOwned['s' + systemID];
+    }
+  }, {
+    key: "getAstrosOwnedCount",
+    value: function getAstrosOwnedCount() {
+      return Object.keys(this.astroOwned).length;
     }
   }, {
     key: "tick",
@@ -41062,16 +41098,21 @@ function () {
           }
         }
 
-        _this.xpCheck(universe, fleets, fleets.fleet[fleetID]);
+        _this.xpCheck(universe, fleets, fleets.fleet[fleetID]); // Ranking the fleet up.
+
+
+        _this.buyFleet(universe, fleets, fleets.fleet[fleetID]); // Buy a fleet if enough resources.
+
 
         _this.battleCheck(universe, fleets, fleets.fleet[fleetID]);
       });
+      this.credits += this.getAstrosOwnedCount();
     }
   }, {
     key: "draw",
     value: function draw(canvas, universe, offset) {
-      var length = Object.keys(this.astroOwned).length / universe.bodies.length;
-      canvas.fillRect(5, 5 + offset * 10, 600 * length, 5, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireColor(this.empireID));
+      var length = this.getAstrosOwnedCount() / universe.bodies.length;
+      canvas.fillRect(5, 5 + offset * 10, 600 * length, 5, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireColor(this.empireID)); // console.log(this.credits);
     }
   }]);
 
@@ -41108,14 +41149,19 @@ function () {
   function Empires() {
     _classCallCheck(this, Empires);
 
-    this.maxEmpires = 6;
+    this.minEmpires = 2;
+    this.maxEmpires = 7;
     this.empires = [];
   }
 
   _createClass(Empires, [{
     key: "createEmpires",
     value: function createEmpires(universe, maxEmpires) {
-      var totalEmpires = maxEmpires || this.maxEmpires;
+      var totalEmpires = maxEmpires || this.minEmpires;
+
+      if (totalEmpires > this.maxEmpires) {
+        totalEmpires = this.maxEmpires;
+      }
 
       for (var e = 0; e < totalEmpires; e++) {
         var homePlanet = universe.getStar(e);
@@ -41125,8 +41171,18 @@ function () {
   }, {
     key: "createEmpire",
     value: function createEmpire(id, homePlanet) {
+      if (this.empires.length > this.minEmpires) {
+        this.minEmpires++;
+      }
+
+      if (this.minEmpires >= this.maxEmpires) {
+        console.log('Max Empires Reached!');
+        return false;
+      }
+
       var empire = new _Empire_js__WEBPACK_IMPORTED_MODULE_0__["Empire"](id, homePlanet);
       this.empires.push(empire);
+      return true;
     }
   }, {
     key: "createFleets",
@@ -41215,7 +41271,7 @@ function () {
     this.maxXP = 1000;
     this.hp = 100;
     this.rank = 1;
-    this.maxRank = 10;
+    this.maxRank = 3;
     this.launchDate = 0;
     this.travelTime = 0;
     this.path = _Functions_js__WEBPACK_IMPORTED_MODULE_0__["fn"].rand(2) + 1;
@@ -41734,6 +41790,20 @@ function () {
     key: "centerScreen",
     value: function centerScreen() {
       this.camera.vector = new _src_Vector_js__WEBPACK_IMPORTED_MODULE_6__["Vector"](this.universe.center.x, this.universe.center.y);
+      this.render();
+    }
+  }, {
+    key: "createEmpire",
+    value: function createEmpire() {
+      var id = this.empires.empires.length;
+      var homePlanet = this.universe.getStar(id);
+
+      if (this.empires.createEmpire(id, homePlanet)) {
+        this.empires.getEmpire(id).createFleet(this.fleets, homePlanet);
+        this.universe.captureSystem(homePlanet.astroID, id);
+        this.empires.getEmpire(id).addSystem(homePlanet.astroID);
+      }
+
       this.render();
     }
   }, {

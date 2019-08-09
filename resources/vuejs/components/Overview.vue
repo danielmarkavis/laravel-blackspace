@@ -28,6 +28,7 @@
                         <button class="btn btn-primary" @click="game.centerScreen()">Center</button>
                         <button class="btn btn-primary" @click="game.testFleetLaunch()">Launch</button>
                         <button class="btn btn-primary" @click="game.render()">Force Render</button>
+                        <button class="btn btn-primary" @click="game.createEmpire()">New Empire</button>
                         <!--        <p v-if="camera">Zoom: {{camera.zoom}}</p>-->
                     </div>
                 </div>

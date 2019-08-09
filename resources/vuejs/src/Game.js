@@ -160,6 +160,17 @@ class Game {
         this.render();
     }
 
+    createEmpire() {
+        let id = this.empires.empires.length;
+        let homePlanet = this.universe.getStar(id);
+        if (this.empires.createEmpire(id, homePlanet)) {
+            this.empires.getEmpire(id).createFleet(this.fleets, homePlanet);
+            this.universe.captureSystem(homePlanet.astroID, id);
+            this.empires.getEmpire(id).addSystem(homePlanet.astroID);
+        }
+        this.render();
+    }
+
     testFleetLaunch() {
         let target = this.universe.getStar(1);
         this.fleets.fleet[0].launchFleet(target.astroID, target, this.ticker.time);

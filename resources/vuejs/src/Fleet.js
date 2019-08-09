@@ -21,7 +21,7 @@ class Fleet {
         this.maxXP = 1000;
         this.hp = 100;
         this.rank = 1;
-        this.maxRank = 10;
+        this.maxRank = 3;
         this.launchDate = 0;
         this.travelTime = 0;
         this.path = fn.rand(2)+1;
