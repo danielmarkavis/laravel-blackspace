@@ -5,6 +5,7 @@ import {Fleets} from '../src/Fleets.js';
 import {Ticker} from '../src/Ticker.js';
 import {Empires} from '../src/Empires.js';
 import {Vector} from '../src/Vector.js';
+import {fn} from '../src/Functions.js';
 import {Options} from '../src/Options.js';
 
 /**
