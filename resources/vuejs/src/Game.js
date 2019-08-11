@@ -102,12 +102,12 @@ export class Game {
     tick(forceRender) {
         this.ticker.tick();
         this.fleets.tick(this.universe, this.empires, this.ticker.time);
-        this.empires.tick(this.universe, this.fleets, this.ticker, () => {this.victory()} );
+        this.empires.tick(this.universe, this.fleets, this.ticker, (alive) => {this.victory(alive[0])} );
         this.render(forceRender || false);
     }
 
-    victory() {
-        this.ticker.victory('Victory!');
+    victory(empireID) {
+        this.ticker.victory('Victory! Emperor '+fn.getEmpireName(empireID)+' conquered the galaxy. All hail the the new overlord!');
         this.render(true);
     }
 

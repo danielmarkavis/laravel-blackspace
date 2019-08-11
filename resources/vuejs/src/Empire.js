@@ -114,7 +114,7 @@ export class Empire {
         if (!this.alive || (this.fleets.length === 0 && this.getAstrosOwnedCount() <= 0)) {
             if (this.alive) {
                 let date = fn.weeksToDate(ticker.time);
-                console.log('Empire '+fn.getEmpireColor(this.empireID)+' has died at: '+date.years+'y '+date.weeks+'w');
+                console.log('Emperor '+fn.getEmpireName(this.empireID)+' abdicated, they ruled for '+date.years+'y '+date.weeks+'w');
             }
             this.alive = false;
             return this.alive;

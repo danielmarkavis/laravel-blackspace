@@ -20,7 +20,9 @@ export class Universe {
         this.galaxy.setup();
         // this.galaxy.drawSpiral();
         // this.galaxy.drawDonut();
-        this.galaxy.drawQuadCircle();
+        this.galaxy.drawLargeDonut();
+        // this.galaxy.drawQuadCircle();
+        // this.galaxy.drawQuadCircle();
     }
 
     /**

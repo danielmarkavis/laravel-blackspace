@@ -1,3 +1,5 @@
+import {Options} from './Options.js';
+
 class Functions {
     constructor() {
     }
@@ -7,28 +9,39 @@ class Functions {
     }
 
     min(value, defaultValue) {
-        if (value < defaultValue ) {
-            return defaultValue;
-        }
-        return value;
-    }
-    max(value, defaultValue) {
-        if (value > defaultValue ) {
+        if (value < defaultValue) {
             return defaultValue;
         }
         return value;
     }
 
-    getEmpireColor(empireID){
-        let color = ['green','orange','red','blue','purple','cyan','teal'];
+    max(value, defaultValue) {
+        if (value > defaultValue) {
+            return defaultValue;
+        }
+        return value;
+    }
+
+    getEmpireColor(empireID) {
         if (empireID < 0) {
             return "transparent";
         }
-        if (empireID >= color.length) {
+        if (empireID >= Options.color.length) {
             console.log('EmpireID out of range');
             return "transparent";
         }
-        return color[empireID];
+        return Options.color[empireID];
+    }
+
+    getEmpireName(empireID) {
+        if (empireID < 0) {
+            return "transparent";
+        }
+        if (empireID >= Options.colorName.length) {
+            console.log('EmpireID out of range');
+            return "transparent";
+        }
+        return Options.colorName[empireID];
     }
 
     rgbToHex(r, g, b) {
@@ -40,7 +53,7 @@ class Functions {
     weeksToDate(time) {
         let years = Math.floor(time / 52);
         let weeks = time % 52;
-        return {'years':years, 'weeks':weeks};
+        return {'years': years, 'weeks': weeks};
     }
 }
 
@@ -56,4 +69,4 @@ function loadImage(url) {
 
 let fn = new Functions();
 
-export { Functions, fn, loadImage };
+export {Functions, fn, loadImage};

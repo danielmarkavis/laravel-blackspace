@@ -41864,7 +41864,7 @@ function () {
       if (!this.alive || this.fleets.length === 0 && this.getAstrosOwnedCount() <= 0) {
         if (this.alive) {
           var date = _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].weeksToDate(ticker.time);
-          console.log('Empire ' + _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireColor(this.empireID) + ' has died at: ' + date.years + 'y ' + date.weeks + 'w');
+          console.log('Emperor ' + _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireName(this.empireID) + ' abdicated, they ruled for ' + date.years + 'y ' + date.weeks + 'w');
         }
 
         this.alive = false;
@@ -41988,15 +41988,15 @@ function () {
   }, {
     key: "tick",
     value: function tick(universe, fleets, ticker, callBack) {
-      var alive = 0;
-      this.empires.forEach(function (empire) {
+      var alive = [];
+      this.empires.forEach(function (empire, key) {
         if (empire.tick(universe, fleets, ticker)) {
-          alive++;
+          alive.push(key);
         }
       });
 
-      if (alive === 1) {
-        callBack();
+      if (alive.length === 1) {
+        callBack(alive.length);
       }
     }
   }, {
@@ -42348,11 +42348,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Functions", function() { return Functions; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "fn", function() { return fn; });
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "loadImage", function() { return loadImage; });
+/* harmony import */ var _Options_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./Options.js */ "./resources/vuejs/src/Options.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
+
 
 var Functions =
 /*#__PURE__*/
@@ -42387,18 +42390,30 @@ function () {
   }, {
     key: "getEmpireColor",
     value: function getEmpireColor(empireID) {
-      var color = ['green', 'orange', 'red', 'blue', 'purple', 'cyan', 'teal'];
-
       if (empireID < 0) {
         return "transparent";
       }
 
-      if (empireID >= color.length) {
+      if (empireID >= _Options_js__WEBPACK_IMPORTED_MODULE_0__["Options"].color.length) {
         console.log('EmpireID out of range');
         return "transparent";
       }
 
-      return color[empireID];
+      return _Options_js__WEBPACK_IMPORTED_MODULE_0__["Options"].color[empireID];
+    }
+  }, {
+    key: "getEmpireName",
+    value: function getEmpireName(empireID) {
+      if (empireID < 0) {
+        return "transparent";
+      }
+
+      if (empireID >= _Options_js__WEBPACK_IMPORTED_MODULE_0__["Options"].colorName.length) {
+        console.log('EmpireID out of range');
+        return "transparent";
+      }
+
+      return _Options_js__WEBPACK_IMPORTED_MODULE_0__["Options"].colorName[empireID];
     }
   }, {
     key: "rgbToHex",
@@ -42536,6 +42551,14 @@ function () {
     key: "drawDonut",
     value: function drawDonut() {
       var radius = 350;
+      this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius, '#ffffff');
+      this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius - 150, '#000000');
+      this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, 50, '#ff0000');
+    }
+  }, {
+    key: "drawLargeDonut",
+    value: function drawLargeDonut() {
+      var radius = 650;
       this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius, '#ffffff');
       this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius - 150, '#000000');
       this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, 50, '#ff0000');
@@ -42734,15 +42757,15 @@ function () {
 
       this.ticker.tick();
       this.fleets.tick(this.universe, this.empires, this.ticker.time);
-      this.empires.tick(this.universe, this.fleets, this.ticker, function () {
-        _this2.victory();
+      this.empires.tick(this.universe, this.fleets, this.ticker, function (alive) {
+        _this2.victory(alive[0]);
       });
       this.render(forceRender || false);
     }
   }, {
     key: "victory",
-    value: function victory() {
-      this.ticker.victory('Victory!');
+    value: function victory(empireID) {
+      this.ticker.victory('Victory! Emperor ' + fn.getEmpireName(empireID) + ' conquered the galaxy. All hail the the new overlord!');
       this.render(true);
     }
   }, {
@@ -42855,8 +42878,8 @@ function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Options", function() { return Options; });
 var Options = {
-  'minEmpires': 4,
-  'maxEmpires': 7,
+  'minEmpires': 6,
+  'maxEmpires': 10,
   'maxSolarSystems': 1000,
   'minBodies': 0,
   'maxBodies': 5,
@@ -42870,7 +42893,9 @@ var Options = {
   'maxXP': 1000,
   'maxRank': 10,
   'maxZoom': 10000,
-  'startCredits': 0
+  'startCredits': 0,
+  'color': ['#00D2BE', '#DC0000', '#1E41FF', '#FF8700', '#FFF500', '#F596C8', '#469BFF', '#9B0000', '#F0D787', '#FFFFFF'],
+  'colorName': ['Mercedes', 'Ferreri', 'RedBull', 'McLaren', 'Renault', 'Racing Point', 'Toro Rosso', 'Alfa Romeo', 'Haas', 'Williams']
 };
 
 /***/ }),
@@ -43001,7 +43026,8 @@ function () {
     this.galaxy.setup(); // this.galaxy.drawSpiral();
     // this.galaxy.drawDonut();
 
-    this.galaxy.drawQuadCircle();
+    this.galaxy.drawLargeDonut(); // this.galaxy.drawQuadCircle();
+    // this.galaxy.drawQuadCircle();
   }
   /**
    *

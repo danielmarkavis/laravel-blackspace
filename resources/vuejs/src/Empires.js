@@ -45,14 +45,14 @@ export class Empires {
     }
 
     tick(universe, fleets, ticker, callBack) {
-        let alive = 0;
-        this.empires.forEach((empire) => {
+        let alive = [];
+        this.empires.forEach((empire, key) => {
             if (empire.tick(universe, fleets, ticker)) {
-                alive++;
+                alive.push(key);
             }
         });
-        if (alive === 1) {
-            callBack();
+        if (alive.length === 1) {
+            callBack(alive.length);
         }
     }
 

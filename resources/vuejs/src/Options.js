@@ -1,6 +1,6 @@
 export let Options = {
-    'minEmpires': 4,
-    'maxEmpires': 7,
+    'minEmpires': 6,
+    'maxEmpires': 10,
     'maxSolarSystems': 1000,
     'minBodies' : 0,
     'maxBodies' : 5,
@@ -15,4 +15,6 @@ export let Options = {
     'maxRank': 10,
     'maxZoom': 10000,
     'startCredits' : 0,
+    'color': ['#00D2BE', '#DC0000', '#1E41FF', '#FF8700', '#FFF500', '#F596C8', '#469BFF', '#9B0000', '#F0D787', '#FFFFFF'],
+    'colorName': ['Mercedes', 'Ferreri', 'RedBull', 'McLaren', 'Renault', 'Racing Point', 'Toro Rosso', 'Alfa Romeo', 'Haas', 'Williams'],
 };

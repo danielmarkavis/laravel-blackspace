@@ -62,6 +62,12 @@ export class Galaxy {
         this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, 50, '#ff0000');
     }
 
+    drawLargeDonut() {
+        let radius = 650;
+        this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius, '#ffffff');
+        this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius-150, '#000000');
+        this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, 50, '#ff0000');
+    }
 
     selectCoords() {
         let found = false;
