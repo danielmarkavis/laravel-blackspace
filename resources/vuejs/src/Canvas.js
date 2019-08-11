@@ -92,8 +92,11 @@ export class Canvas {
         this.ctx.stroke();
     }
 
-    drawText(x, y, str) {
+    drawText(x, y, str, color) {
         this.ctx.font = "12px Arial";
+        // this.ctx.strokeStyle = color;
+        this.ctx.fillStyle = color;
+
         this.ctx.fillText(str, x, y);
     }
 

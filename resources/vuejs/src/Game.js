@@ -44,7 +44,6 @@ export class Game {
     setupCanvas() {
         this.canvas = new Canvas();
         this.canvas.setup("my-canvas", {width: 1280, height: 720});
-        // this.canvas.drawImage(document.getElementById('galaxy'),0,0);
     }
 
     setupCamera() {

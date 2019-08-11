@@ -44,12 +44,25 @@ export class Galaxy {
             lineColor: '#FFFFFF',
         });
     }
+
+    drawQuadCircle() {
+        let radius = 150;
+        let width = Math.round(this.galaxy.width*0.25);
+        let height = Math.round(this.galaxy.height*0.25);
+        this.galaxy.drawCircle(this.galaxy.center.x - width, this.galaxy.center.y - height, radius, '#ffffff');
+        this.galaxy.drawCircle(this.galaxy.center.x - width, this.galaxy.center.y + height, radius, '#ffffff');
+        this.galaxy.drawCircle(this.galaxy.center.x + width, this.galaxy.center.y - height, radius, '#ffffff');
+        this.galaxy.drawCircle(this.galaxy.center.x + width, this.galaxy.center.y + height, radius, '#ffffff');
+    }
+
     drawDonut() {
         let radius = 350;
         this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius, '#ffffff');
         this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius-150, '#000000');
         this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, 50, '#ff0000');
     }
+
+
     selectCoords() {
         let found = false;
         let x = null;

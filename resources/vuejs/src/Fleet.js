@@ -5,10 +5,12 @@ import {Options} from "./Options";
 export class Fleet {
 
     /**
+     *
      * @param astroID
      * @param x
      * @param y
      * @param empireID
+     * @param rank
      */
     constructor(astroID, x, y, empireID, rank) {
         this.locationVector = new Vector(x, y);

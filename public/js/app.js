@@ -41642,8 +41642,10 @@ function () {
     }
   }, {
     key: "drawText",
-    value: function drawText(x, y, str) {
-      this.ctx.font = "12px Arial";
+    value: function drawText(x, y, str, color) {
+      this.ctx.font = "12px Arial"; // this.ctx.strokeStyle = color;
+
+      this.ctx.fillStyle = color;
       this.ctx.fillText(str, x, y);
     }
   }, {
@@ -41745,6 +41747,7 @@ function () {
     this.bot = new _Bot_js__WEBPACK_IMPORTED_MODULE_0__["Bot"](empireID, homePlanet);
     this.currentTargets = [];
     this.credits = _Options_js__WEBPACK_IMPORTED_MODULE_2__["Options"].startCredits;
+    this.alive = true;
   }
 
   _createClass(Empire, [{
@@ -41780,9 +41783,11 @@ function () {
             this.credits -= _Options_js__WEBPACK_IMPORTED_MODULE_2__["Options"].fleetCost * rank;
             this.createFleet(fleets, this.homePlanet, rank);
           } else {
-            console.log('Home planet Blocked'); // Move homePlanet
+            // console.log('Home planet Blocked'); // Move homePlanet
             //     let system = universe.getAstro(fleet.location);
-            //     this.createFleet(fleets, system);
+            var _rank = 1;
+            this.credits -= _Options_js__WEBPACK_IMPORTED_MODULE_2__["Options"].fleetCost * _rank;
+            this.createFleet(fleets, this.homePlanet, _rank);
           }
         }
       }
@@ -41856,8 +41861,14 @@ function () {
       var _this2 = this;
 
       // this.checkHomePlanet(universe);
-      if (this.fleets.length === 0 && this.getAstrosOwnedCount() <= 0) {
-        return false;
+      if (!this.alive || this.fleets.length === 0 && this.getAstrosOwnedCount() <= 0) {
+        if (this.alive) {
+          var date = _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].weeksToDate(ticker.time);
+          console.log('Empire ' + _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireColor(this.empireID) + ' has died at: ' + date.years + 'y ' + date.weeks + 'w');
+        }
+
+        this.alive = false;
+        return this.alive;
       }
 
       this.currentTargets = this.getCurrentTargets();
@@ -41878,7 +41889,7 @@ function () {
       this.buyFleet(universe, fleets); // Buy a fleet if enough resources.
 
       this.credits += this.astroCount;
-      return true;
+      return this.alive;
     }
   }, {
     key: "draw",
@@ -41888,7 +41899,7 @@ function () {
       var fleetLength = this.fleets.length / fleets.totalFleets;
       canvas.fillRect(105, 5 + offset * 12, 600 * bodyLength, 5, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireColor(this.empireID));
       canvas.fillRect(105, 10 + offset * 12, 600 * fleetLength, 2, 'white');
-      canvas.drawText(5, 15 + offset * 12, this.credits); // canvas.drawText(5, 15+(offset*12), this.astroCount);
+      canvas.drawText(5, 15 + offset * 12, this.credits, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireColor(this.empireID)); // canvas.drawText(5, 15+(offset*12), this.astroCount);
     }
   }]);
 
@@ -42028,10 +42039,12 @@ var Fleet =
 /*#__PURE__*/
 function () {
   /**
+   *
    * @param astroID
    * @param x
    * @param y
    * @param empireID
+   * @param rank
    */
   function Fleet(astroID, x, y, empireID, rank) {
     _classCallCheck(this, Fleet);
@@ -42393,6 +42406,16 @@ function () {
       if (r > 255 || g > 255 || b > 255) throw "Invalid color component";
       return (r << 16 | g << 8 | b).toString(16);
     }
+  }, {
+    key: "weeksToDate",
+    value: function weeksToDate(time) {
+      var years = Math.floor(time / 52);
+      var weeks = time % 52;
+      return {
+        'years': years,
+        'weeks': weeks
+      };
+    }
   }]);
 
   return Functions;
@@ -42497,6 +42520,17 @@ function () {
         lineWidth: 40,
         lineColor: '#FFFFFF'
       });
+    }
+  }, {
+    key: "drawQuadCircle",
+    value: function drawQuadCircle() {
+      var radius = 150;
+      var width = Math.round(this.galaxy.width * 0.25);
+      var height = Math.round(this.galaxy.height * 0.25);
+      this.galaxy.drawCircle(this.galaxy.center.x - width, this.galaxy.center.y - height, radius, '#ffffff');
+      this.galaxy.drawCircle(this.galaxy.center.x - width, this.galaxy.center.y + height, radius, '#ffffff');
+      this.galaxy.drawCircle(this.galaxy.center.x + width, this.galaxy.center.y - height, radius, '#ffffff');
+      this.galaxy.drawCircle(this.galaxy.center.x + width, this.galaxy.center.y + height, radius, '#ffffff');
     }
   }, {
     key: "drawDonut",
@@ -42629,7 +42663,7 @@ function () {
       this.canvas.setup("my-canvas", {
         width: 1280,
         height: 720
-      }); // this.canvas.drawImage(document.getElementById('galaxy'),0,0);
+      });
     }
   }, {
     key: "setupCamera",
@@ -42821,7 +42855,7 @@ function () {
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "Options", function() { return Options; });
 var Options = {
-  'minEmpires': 6,
+  'minEmpires': 4,
   'maxEmpires': 7,
   'maxSolarSystems': 1000,
   'minBodies': 0,
@@ -42965,8 +42999,9 @@ function () {
     };
     this.galaxy = new _Galaxy_js__WEBPACK_IMPORTED_MODULE_3__["Galaxy"]();
     this.galaxy.setup(); // this.galaxy.drawSpiral();
+    // this.galaxy.drawDonut();
 
-    this.galaxy.drawDonut();
+    this.galaxy.drawQuadCircle();
   }
   /**
    *

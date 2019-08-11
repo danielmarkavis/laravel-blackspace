@@ -14,6 +14,7 @@ export class Empire {
         this.bot = new Bot(empireID,homePlanet);
         this.currentTargets = [];
         this.credits = Options.startCredits;
+        this.alive = true;
     }
 
     createFleet(fleets, target, rank) {
@@ -43,9 +44,11 @@ export class Empire {
                     this.createFleet(fleets, this.homePlanet, rank);
                 }
                 else {
-                    console.log('Home planet Blocked'); // Move homePlanet
+                    // console.log('Home planet Blocked'); // Move homePlanet
                 //     let system = universe.getAstro(fleet.location);
-                //     this.createFleet(fleets, system);
+                    let rank = 1;
+                    this.credits -= (Options.fleetCost * rank);
+                    this.createFleet(fleets, this.homePlanet, rank);
                 }
             }
         }
@@ -108,8 +111,13 @@ export class Empire {
     tick(universe, fleets, ticker) {
         // this.checkHomePlanet(universe);
 
-        if (this.fleets.length === 0 && this.getAstrosOwnedCount() <= 0) {
-            return false;
+        if (!this.alive || (this.fleets.length === 0 && this.getAstrosOwnedCount() <= 0)) {
+            if (this.alive) {
+                let date = fn.weeksToDate(ticker.time);
+                console.log('Empire '+fn.getEmpireColor(this.empireID)+' has died at: '+date.years+'y '+date.weeks+'w');
+            }
+            this.alive = false;
+            return this.alive;
         }
 
         this.currentTargets = this.getCurrentTargets();
@@ -125,7 +133,7 @@ export class Empire {
         });
         this.buyFleet(universe, fleets); // Buy a fleet if enough resources.
         this.credits += this.astroCount;
-        return true;
+        return this.alive;
     }
 
     draw(canvas, universe, fleets, offset) {
@@ -134,7 +142,7 @@ export class Empire {
         let fleetLength = this.fleets.length / fleets.totalFleets;
         canvas.fillRect(105, 5+(offset*12), 600 * bodyLength, 5, fn.getEmpireColor(this.empireID));
         canvas.fillRect(105, 10+(offset*12), 600 * fleetLength, 2, 'white');
-        canvas.drawText(5, 15+(offset*12), this.credits);
+        canvas.drawText(5, 15+(offset*12), this.credits, fn.getEmpireColor(this.empireID));
         // canvas.drawText(5, 15+(offset*12), this.astroCount);
     }
 }

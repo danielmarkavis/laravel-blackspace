@@ -1,5 +1,5 @@
 export let Options = {
-    'minEmpires': 6,
+    'minEmpires': 4,
     'maxEmpires': 7,
     'maxSolarSystems': 1000,
     'minBodies' : 0,
