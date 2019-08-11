@@ -1,6 +1,6 @@
 import {fn} from "./Functions";
 
-class Bot {
+export class Bot {
     constructor(empireID, homePlanet) {
         this.empireID = empireID;
         this.homePlanet = homePlanet;
@@ -90,5 +90,3 @@ class Bot {
     }
 
 }
-
-export { Bot };

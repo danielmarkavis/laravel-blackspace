@@ -1,7 +1,8 @@
 import {fn} from './Functions.js';
 import {Vector} from './Vector.js';
+import {Options} from "./Options";
 
-class Fleet {
+export class Fleet {
 
     /**
      * @param astroID
@@ -9,7 +10,7 @@ class Fleet {
      * @param y
      * @param empireID
      */
-    constructor(astroID, x, y, empireID) {
+    constructor(astroID, x, y, empireID, rank) {
         this.locationVector = new Vector(x, y);
         this.startVector = new Vector(x, y);
         this.endVector = new Vector(x, y);
@@ -18,10 +19,8 @@ class Fleet {
         this.empireID = empireID;
         this.speed = 1000 + fn.rand(1000);
         this.xp = 0;
-        this.maxXP = 1000;
-        this.hp = 100;
-        this.rank = 1;
-        this.maxRank = 3;
+        this.hp = 100 * rank;
+        this.rank = rank || 1;
         this.launchDate = 0;
         this.travelTime = 0;
         this.path = fn.rand(2)+1;
@@ -82,11 +81,11 @@ class Fleet {
                 this.addXP(100);
             }
             if (system.empireID !== -1) {
-                empires.getEmpire(system.empireID).removeSystem(system.astroID);
+                empires.getEmpire(system.empireID).removeSystem(universe, system.astroID);
             }
             universe.captureSystem(system.astroID, this.empireID);
 
-            empires.getEmpire(this.empireID).addSystem(system.astroID);
+            empires.getEmpire(this.empireID).addSystem(universe, system.astroID);
         }
     }
 
@@ -125,8 +124,8 @@ class Fleet {
 
     addXP(xp) {
         this.xp += xp;
-        if (this.xp > this.maxXP) {
-            this.xp = this.maxXP;
+        if (this.xp > Options.maxXP) {
+            this.xp = Options.maxXP;
         }
     }
 
@@ -143,7 +142,8 @@ class Fleet {
         if (this.isHome()) {
             offset = 10;
         }
-        canvas.fillRect(Math.round(canvasCoords.x-2)+offset, Math.round(canvasCoords.y-2)+offset, 5, 5, fn.getEmpireColor(this.empireID));
+        // canvas.fillRect(Math.round(canvasCoords.x-2)+offset, Math.round(canvasCoords.y-2)+offset, 5, 5, fn.getEmpireColor(this.empireID));
+        canvas.drawTriangle(Math.round(canvasCoords.x)+offset, Math.round(canvasCoords.y)+offset, fn.getEmpireColor(this.empireID));
     }
 
     drawLines(canvas, camera) {
@@ -164,5 +164,3 @@ class Fleet {
     }
 
 }
-
-export {Fleet};

@@ -1,4 +1,4 @@
-class Vector {
+export class Vector {
     /**
      *
      * @param x
@@ -65,5 +65,3 @@ class Vector {
         this.y += value;
     }
 }
-
-export {Vector};

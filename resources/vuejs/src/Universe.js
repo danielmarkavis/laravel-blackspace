@@ -1,29 +1,32 @@
 import {Astro} from './Astro.js';
 import {fn} from './Functions.js';
+import {Options} from './Options.js';
+import {Galaxy} from './Galaxy.js';
+import {Vector} from "./Vector";
 
-class Universe {
+export class Universe {
     constructor(width, height, distanceScale) {
         this.bodies = [];
         this.stars = []; // Array index of stars
-        this.maxSolarSystems = 1000;
-        this.minBodies = 0;
-        this.maxBodies = 0;
-        this.maxOrbits = 20;
-        this.border = 100;
-        this.width = ((width-this.border) * distanceScale) || 1280;
-        this.height = ((height-this.border) * distanceScale) || 720;
+        this.width = ((width-Options.border) * distanceScale) || 1280;
+        this.height = ((height-Options.border) * distanceScale) || 720;
         this.orbits = [];
         this.center = {
             'x': this.width / 2,
             'y': this.height / 2
         };
+
+        this.galaxy = new Galaxy();
+        this.galaxy.setup();
+        // this.galaxy.drawSpiral();
+        this.galaxy.drawDonut();
     }
 
     /**
      *
      */
     createBodies() {
-        for (let s = 1; s <= this.maxSolarSystems; s++) {
+        for (let s = 1; s <= Options.maxSolarSystems; s++) {
             this.createSolarSystem(s);
         }
         // console.log(this.stars);
@@ -35,19 +38,23 @@ class Universe {
      */
     createSolarSystem(systemID) {
         let star = this.createStar(systemID);
-        if (this.maxBodies <= 0) {
+        if (Options.maxBodies <= 0) {
             return;
         }
-        let max = fn.rand(this.maxBodies)+1;
+        let max = fn.rand(Options.maxBodies)+1;
+        star.orbitting = max;
         for (let b = 1; b <= max; b++) {
-            this.createPlanet(star, systemID, b);
+            let planet = this.createPlanet(star, systemID, b);
+            star.nodes.push(planet);
         }
     }
 
     createStar(systemID) {
         let star = new Astro('Star ' + systemID);
         star.setAsStar();
-        star.vector.setVector(fn.rand(this.width), fn.rand(this.height));
+        let vector = this.galaxy.selectCoords()
+        star.vector.setVector( vector.x * Options.distanceScale, vector.y * Options.distanceScale );
+        // star.vector.setVector(fn.rand(this.width), fn.rand(this.height));
         star.name = this.systemNameGenerator();
         star.astroID = this.bodies.length;
         this.bodies.push(star); // Star
@@ -73,7 +80,8 @@ class Universe {
         planet.vector.setVector(star.vector.x, star.vector.y);
         planet.astroID = this.bodies.length - 1;
 
-        this.bodies.push(planet); // Planets
+        // this.bodies.push(planet); // Planets
+        return planet;
     }
 
     /**
@@ -81,7 +89,7 @@ class Universe {
      */
     createOrbits() {
         this.orbits = [];
-        for (let i = 0; i < this.maxOrbits; i++) {
+        for (let i = 0; i < Options.maxOrbits; i++) {
             this.orbits[i] = i + 1;
         }
     }
@@ -113,11 +121,23 @@ class Universe {
     captureSystem(systemID, empireID) {
         this.bodies[systemID].empireID = empireID;
         this.bodies[systemID].homePlanet = false;
+        if (this.bodies[systemID].nodes.length > 0) {
+            this.bodies[systemID].nodes.forEach((node)=> {
+                this.bodies[node.astroID].empireID = empireID;
+                this.bodies[node.astroID].homePlanet = false;
+            });
+        }
     }
 
     claimHomePlanet(systemID, empireID) {
         this.bodies[systemID].empireID = empireID;
         this.bodies[systemID].homePlanet = true;
+        if (this.bodies[systemID].nodes.length > 0) {
+            this.bodies[systemID].nodes.forEach((node)=>{
+                this.bodies[node.astroID].empireID = empireID;
+                this.bodies[node.astroID].homePlanet = false;
+            });
+        }
     }
 
     systemNameGenerator() {
@@ -138,6 +158,16 @@ class Universe {
         return nStr;
     }
 
+    move(astro, time) {
+        let newCoords = astro.vector;
+        if (astro.parent !== null) {
+            newCoords = astro.vector.pointRotate(astro.vector.x, astro.vector.y - astro.orbit.distance, (time * astro.orbit.speed) + astro.orbit.initial);
+            newCoords.y = newCoords.y + astro.orbit.distance;
+        }
+        return newCoords;
+    }
+
+
     /**
      *
      * @param canvas
@@ -146,9 +176,22 @@ class Universe {
      */
     draw(canvas, camera, time) {
         this.bodies.forEach((body) => {
-            body.draw(canvas, camera, time);
+            // body.draw(canvas, camera, time);
+            let coords = this.move(body, time);
+            let color = (body.type === 'star') ? 'yellow' : 'green';
+
+            let astroCoords = new Vector(coords.x, coords.y);
+            let canvasCoords = astroCoords.fitToScreen(canvas, camera);
+
+            if (body.type === 'star') {
+                canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(body.radius * (camera.zoom / 10), body.radius+2), 'yellow');
+                canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(body.radius+5 * (camera.zoom / 10), body.radius+5), 'transparent', fn.getEmpireColor(body.empireID));
+            }
+            // if ((camera.zoom > 1000 && body.type === 'planet')) {
+            //     canvas.drawCircle(coords.x, coords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
+                // canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius * (camera.zoom / 10), this.radius), 'green');
+            // }
         })
     }
 }
 
-export {Universe};

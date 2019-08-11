@@ -1,18 +1,16 @@
-// import {Vector} from './Vector.js';
 import {Empire} from './Empire.js';
+import {Options} from './Options.js';
 
-class Empires {
+export class Empires {
 
     constructor() {
-        this.minEmpires = 2;
-        this.maxEmpires = 7;
         this.empires = [];
     }
 
     createEmpires(universe, maxEmpires) {
-        let totalEmpires = maxEmpires || this.minEmpires;
-        if (totalEmpires > this.maxEmpires) {
-            totalEmpires = this.maxEmpires;
+        let totalEmpires = maxEmpires || Options.minEmpires;
+        if (totalEmpires > Options.maxEmpires) {
+            totalEmpires = Options.maxEmpires;
         }
         for (let e = 0; e < totalEmpires; e++) {
             let homePlanet = universe.getStar(e);
@@ -21,10 +19,10 @@ class Empires {
     }
 
     createEmpire(id, homePlanet) {
-        if (this.empires.length > this.minEmpires) {
-            this.minEmpires++;
+        if (this.empires.length > Options.minEmpires) {
+            Options.minEmpires++;
         }
-        if (this.minEmpires >= this.maxEmpires) {
+        if (Options.minEmpires >= Options.maxEmpires) {
             console.log('Max Empires Reached!');
             return false;
         }
@@ -37,7 +35,7 @@ class Empires {
     createFleets(universe, fleets) {
         this.empires.forEach((empire, key) => {
             universe.captureSystem(empire.homePlanet.astroID, key);
-            this.getEmpire(key).addSystem(empire.homePlanet.astroID);
+            this.getEmpire(key).addSystem(universe, empire.homePlanet.astroID);
             empire.createFleet(fleets, empire.homePlanet);
         })
     }
@@ -46,17 +44,21 @@ class Empires {
         return this.empires[empireID];
     }
 
-    tick(universe, fleets, time) {
+    tick(universe, fleets, ticker, callBack) {
+        let alive = 0;
         this.empires.forEach((empire) => {
-            empire.tick(universe, fleets, time);
+            if (empire.tick(universe, fleets, ticker)) {
+                alive++;
+            }
         });
+        if (alive === 1) {
+            callBack();
+        }
     }
 
-    draw(canvas, universe) {
+    draw(canvas, universe, fleets) {
         this.empires.forEach((empire,key) => {
-            empire.draw(canvas, universe, key);
+            empire.draw(canvas, universe, fleets, key);
         });
     }
 }
-
-export {Empires};

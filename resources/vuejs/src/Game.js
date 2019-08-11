@@ -5,16 +5,16 @@ import {Fleets} from '../src/Fleets.js';
 import {Ticker} from '../src/Ticker.js';
 import {Empires} from '../src/Empires.js';
 import {Vector} from '../src/Vector.js';
+import {Options} from '../src/Options.js';
 
 /**
  * Deals with create a new game.
  */
-class Game {
+export class Game {
     constructor() {
-        this.newGame();
     }
 
-    newGame() {
+    newGame(callBack) {
         if (this.ticker != null) {
             this.ticker.killTimer();
         }
@@ -26,13 +26,8 @@ class Game {
         this.fleets = [];
         this.empires = [];
         this.paused = true;
-        this.options = {
-            'distanceScale': 1000,
-            'zoom': 1,
-            'interval': 1,
-        };
 
-        this.ticker = new Ticker(this.options.interval, () => {
+        this.ticker = new Ticker(Options.interval, () => {
             this.tick();
         });
         this.setupCanvas();
@@ -42,17 +37,20 @@ class Game {
         this.setupEmpires();
 
         this.render();
-        this.ticker.startTimer(this.options.interval);
+        this.ticker.startTimer(Options.interval);
+        callBack();
     }
 
     setupCanvas() {
-        this.canvas = new Canvas("my-canvas", {width: 1280, height: 720});
+        this.canvas = new Canvas();
+        this.canvas.setup("my-canvas", {width: 1280, height: 720});
+        // this.canvas.drawImage(document.getElementById('galaxy'),0,0);
     }
 
     setupCamera() {
         this.camera = new Camera();
-        this.camera.distanceScale = this.options.distanceScale;
-        this.camera.setZoom(this.options.zoom);
+        this.camera.distanceScale = Options.distanceScale;
+        this.camera.setZoom(Options.zoom);
     }
 
     setupUniverse() {
@@ -85,7 +83,7 @@ class Game {
     }
 
     drawEmpires() {
-        this.empires.draw(this.canvas, this.universe);
+        this.empires.draw(this.canvas, this.universe, this.fleets);
     }
 
     drawCamera() {
@@ -95,7 +93,6 @@ class Game {
     render(forceRender) {
         if (this.canvas.canRender(this.ticker.time) || forceRender) {
             this.canvas.clear();
-            // this.drawCamera();
             this.drawFleetLines();
             this.drawUniverse();
             this.drawFleets();
@@ -106,8 +103,13 @@ class Game {
     tick(forceRender) {
         this.ticker.tick();
         this.fleets.tick(this.universe, this.empires, this.ticker.time);
-        this.empires.tick(this.universe, this.fleets, this.ticker.time);
+        this.empires.tick(this.universe, this.fleets, this.ticker, () => {this.victory()} );
         this.render(forceRender || false);
+    }
+
+    victory() {
+        this.ticker.victory('Victory!');
+        this.render(true);
     }
 
     setInterval(value) {
@@ -146,18 +148,18 @@ class Game {
                 this.camera.zoomOut();
                 break;
         }
-        this.render();
+        this.render(true);
     }
 
     centerPlanet() {
         let system = this.universe.getAstro(0);
         this.camera.vector = new Vector(system.vector.x, system.vector.y);
-        this.render();
+        this.render(true);
     }
 
     centerScreen() {
         this.camera.vector = new Vector(this.universe.center.x, this.universe.center.y);
-        this.render();
+        this.render(true);
     }
 
     createEmpire() {
@@ -166,9 +168,17 @@ class Game {
         if (this.empires.createEmpire(id, homePlanet)) {
             this.empires.getEmpire(id).createFleet(this.fleets, homePlanet);
             this.universe.captureSystem(homePlanet.astroID, id);
-            this.empires.getEmpire(id).addSystem(homePlanet.astroID);
+            this.empires.getEmpire(id).addSystem(this.universe, homePlanet.astroID);
         }
-        this.render();
+        this.render(true);
+    }
+
+    showEmpires() {
+        console.log(this.empires);
+    }
+
+    showFleets() {
+        console.log(this.fleets);
     }
 
     testFleetLaunch() {
@@ -177,5 +187,3 @@ class Game {
         this.render();
     }
 }
-
-export {Game};

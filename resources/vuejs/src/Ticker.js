@@ -1,4 +1,4 @@
-class Ticker {
+export class Ticker {
 
     constructor(interval, callBack) {
         this.time = 0;
@@ -32,10 +32,12 @@ class Ticker {
     play() {
         this.playing = true;
     }
+    victory(message) {
+        this.playing = false;
+        console.log(message);
+    }
 
     tick() {
         this.time++;
     }
 }
-
-export {Ticker};

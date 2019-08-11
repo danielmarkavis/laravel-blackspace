@@ -1,0 +1,18 @@
+export let Options = {
+    'minEmpires': 6,
+    'maxEmpires': 7,
+    'maxSolarSystems': 1000,
+    'minBodies' : 0,
+    'maxBodies' : 5,
+    'maxOrbits' : 20,
+    'border' : 0,
+    'distanceScale': 10000,
+    'zoom': 1,
+    'interval': 1,
+    'maxFleets': 400,
+    'fleetCost': 10000,
+    'maxXP': 1000,
+    'maxRank': 10,
+    'maxZoom': 10000,
+    'startCredits' : 0,
+};

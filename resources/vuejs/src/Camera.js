@@ -1,14 +1,13 @@
 import {Vector} from './Vector.js';
+import {Options} from './Options.js';
 
-class Camera {
+export class Camera {
 
     constructor() {
         this.zoom = 1;
-        this.distanceScale = 10000;
         this.vector = new Vector(0, 0);
         this.zoomStep = 2;
-        this.maxZoom = 10000;
-        this.moveStep = 10 * this.distanceScale;
+        this.moveStep = 10 * Options.distanceScale;
         this.color = 'blue';
     }
 
@@ -21,7 +20,7 @@ class Camera {
     }
 
     zoomIn() {
-        if (this.zoom < this.maxZoom) {
+        if (this.zoom < Options.maxZoom) {
             this.zoom = this.zoom * this.zoomStep;
         }
     }
@@ -34,7 +33,6 @@ class Camera {
 
     moveLeft() {
         this.vector.moveLeft(this.moveStep);
-        // console.log(this.moveStep);
     }
 
     moveRight() {
@@ -54,5 +52,3 @@ class Camera {
         // canvas.drawLine(canvas.center.x, canvas.center.y+20, canvas.center.x, canvas.height, 'grey');
     }
 }
-
-export {Camera};
