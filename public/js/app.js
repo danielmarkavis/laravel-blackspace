@@ -41935,6 +41935,7 @@ function () {
     _classCallCheck(this, Empires);
 
     this.empires = [];
+    this.alive = [];
   }
 
   _createClass(Empires, [{
@@ -41988,15 +41989,17 @@ function () {
   }, {
     key: "tick",
     value: function tick(universe, fleets, ticker, callBack) {
-      var alive = [];
+      var _this2 = this;
+
+      this.alive = [];
       this.empires.forEach(function (empire, key) {
         if (empire.tick(universe, fleets, ticker)) {
-          alive.push(key);
+          _this2.alive.push(key);
         }
       });
 
-      if (alive.length === 1) {
-        callBack(alive.length);
+      if (this.alive.length === 1) {
+        callBack();
       }
     }
   }, {
@@ -42625,12 +42628,14 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _src_Ticker_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../src/Ticker.js */ "./resources/vuejs/src/Ticker.js");
 /* harmony import */ var _src_Empires_js__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../src/Empires.js */ "./resources/vuejs/src/Empires.js");
 /* harmony import */ var _src_Vector_js__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ../src/Vector.js */ "./resources/vuejs/src/Vector.js");
-/* harmony import */ var _src_Options_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../src/Options.js */ "./resources/vuejs/src/Options.js");
+/* harmony import */ var _src_Functions_js__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ../src/Functions.js */ "./resources/vuejs/src/Functions.js");
+/* harmony import */ var _src_Options_js__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ../src/Options.js */ "./resources/vuejs/src/Options.js");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
+
 
 
 
@@ -42667,7 +42672,7 @@ function () {
       this.fleets = [];
       this.empires = [];
       this.paused = true;
-      this.ticker = new _src_Ticker_js__WEBPACK_IMPORTED_MODULE_4__["Ticker"](_src_Options_js__WEBPACK_IMPORTED_MODULE_7__["Options"].interval, function () {
+      this.ticker = new _src_Ticker_js__WEBPACK_IMPORTED_MODULE_4__["Ticker"](_src_Options_js__WEBPACK_IMPORTED_MODULE_8__["Options"].interval, function () {
         _this.tick();
       });
       this.setupCanvas();
@@ -42676,7 +42681,7 @@ function () {
       this.setupFleets();
       this.setupEmpires();
       this.render();
-      this.ticker.startTimer(_src_Options_js__WEBPACK_IMPORTED_MODULE_7__["Options"].interval);
+      this.ticker.startTimer(_src_Options_js__WEBPACK_IMPORTED_MODULE_8__["Options"].interval);
       callBack();
     }
   }, {
@@ -42692,8 +42697,8 @@ function () {
     key: "setupCamera",
     value: function setupCamera() {
       this.camera = new _src_Camera_js__WEBPACK_IMPORTED_MODULE_1__["Camera"]();
-      this.camera.distanceScale = _src_Options_js__WEBPACK_IMPORTED_MODULE_7__["Options"].distanceScale;
-      this.camera.setZoom(_src_Options_js__WEBPACK_IMPORTED_MODULE_7__["Options"].zoom);
+      this.camera.distanceScale = _src_Options_js__WEBPACK_IMPORTED_MODULE_8__["Options"].distanceScale;
+      this.camera.setZoom(_src_Options_js__WEBPACK_IMPORTED_MODULE_8__["Options"].zoom);
     }
   }, {
     key: "setupUniverse",
@@ -42757,15 +42762,15 @@ function () {
 
       this.ticker.tick();
       this.fleets.tick(this.universe, this.empires, this.ticker.time);
-      this.empires.tick(this.universe, this.fleets, this.ticker, function (alive) {
-        _this2.victory(alive[0]);
+      this.empires.tick(this.universe, this.fleets, this.ticker, function () {
+        _this2.victory(_this2.empires.alive[0]);
       });
       this.render(forceRender || false);
     }
   }, {
     key: "victory",
     value: function victory(empireID) {
-      this.ticker.victory('Victory! Emperor ' + fn.getEmpireName(empireID) + ' conquered the galaxy. All hail the the new overlord!');
+      this.ticker.victory('Victory! Emperor ' + _src_Functions_js__WEBPACK_IMPORTED_MODULE_7__["fn"].getEmpireName(empireID) + ' conquered the galaxy. All hail the new overlord!');
       this.render(true);
     }
   }, {
@@ -42895,7 +42900,7 @@ var Options = {
   'maxZoom': 10000,
   'startCredits': 0,
   'color': ['#00D2BE', '#DC0000', '#1E41FF', '#FF8700', '#FFF500', '#F596C8', '#469BFF', '#9B0000', '#F0D787', '#FFFFFF'],
-  'colorName': ['Mercedes', 'Ferreri', 'RedBull', 'McLaren', 'Renault', 'Racing Point', 'Toro Rosso', 'Alfa Romeo', 'Haas', 'Williams']
+  'colorName': ['Mercedes', 'Ferrari', 'RedBull', 'McLaren', 'Renault', 'Racing Point', 'Toro Rosso', 'Alfa Romeo', 'Haas', 'Williams']
 };
 
 /***/ }),
@@ -43023,10 +43028,9 @@ function () {
       'y': this.height / 2
     };
     this.galaxy = new _Galaxy_js__WEBPACK_IMPORTED_MODULE_3__["Galaxy"]();
-    this.galaxy.setup(); // this.galaxy.drawSpiral();
-    // this.galaxy.drawDonut();
+    this.galaxy.setup(); // this.galaxy.drawLargeDonut();
 
-    this.galaxy.drawLargeDonut(); // this.galaxy.drawQuadCircle();
+    this.galaxy.drawSpiral(); // this.galaxy.drawDonut();
     // this.galaxy.drawQuadCircle();
   }
   /**
@@ -43359,8 +43363,8 @@ function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! D:\Wamp.NET\sites\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
-module.exports = __webpack_require__(/*! D:\Wamp.NET\sites\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
+module.exports = __webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })

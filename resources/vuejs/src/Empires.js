@@ -5,6 +5,7 @@ export class Empires {
 
     constructor() {
         this.empires = [];
+        this.alive = [];
     }
 
     createEmpires(universe, maxEmpires) {
@@ -45,14 +46,14 @@ export class Empires {
     }
 
     tick(universe, fleets, ticker, callBack) {
-        let alive = [];
+        this.alive = [];
         this.empires.forEach((empire, key) => {
             if (empire.tick(universe, fleets, ticker)) {
-                alive.push(key);
+                this.alive.push(key);
             }
         });
-        if (alive.length === 1) {
-            callBack(alive.length);
+        if (this.alive.length === 1) {
+            callBack();
         }
     }
 
