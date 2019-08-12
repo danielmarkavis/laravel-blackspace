@@ -25,8 +25,8 @@ export class Fleet {
         this.rank = rank || 1;
         this.launchDate = 0;
         this.travelTime = 0;
-        this.path = fn.rand(2)+1;
-        this.color = 'white';
+        this.path = fn.rand(3)+1;
+        this.color = fn.getEmpireColor(empireID);
     }
 
     isHome() {
@@ -41,8 +41,8 @@ export class Fleet {
         return this.locationVector.getDistance(this.endVector.x, this.endVector.y);
     }
 
-    getArrivalTime() {
-        let distance = this.getDistance();
+    getArrivalTime(newDistance) {
+        let distance = newDistance || this.getDistance();
         return Math.ceil(distance / (this.speed * this.rank)); // Get tick of arrival.
     }
 
@@ -72,40 +72,8 @@ export class Fleet {
         return new Vector(this.startVector.x - relativeVector.x, this.startVector.y - relativeVector.y);
     }
 
-    tick(universe, empires, time) {
-        if (this.hasArrived(time) && !this.isHome()) {
-            this.setArrived();
-            let system = universe.getAstro(this.location);
-            if (system.empireID !== -1 && system.empireID !== this.empireID) {
-                this.addXP(500);
-                this.damageFleet(5);
-            } else {
-                this.addXP(100);
-            }
-            if (system.empireID !== -1) {
-                empires.getEmpire(system.empireID).removeSystem(universe, system.astroID);
-            }
-            universe.captureSystem(system.astroID, this.empireID);
-
-            empires.getEmpire(this.empireID).addSystem(universe, system.astroID);
-        }
-    }
-
-
-    resetFleet(fleets, homePlanet) {
-        this.locationVector = new Vector(homePlanet.vector.x, homePlanet.vector.y);
-        this.startVector = new Vector(homePlanet.vector.x, homePlanet.vector.y);
-        this.endVector = new Vector(homePlanet.vector.x, homePlanet.vector.y);
-        this.location = homePlanet.astroID; // index for the astro array
-        this.target = homePlanet.astroID; // index for the astro array
-        this.rank = 1;
-        this.xp = 0;
-        this.hp = 100;
-        this.path = fn.rand(2)+1;
-    }
-
     /**
-     * @param astroID
+    /**
      * @param target
      * @param time
      */
@@ -113,11 +81,9 @@ export class Fleet {
         this.setTarget(target);
         this.launchDate = time;
         this.travelTime = this.getArrivalTime();
-        // console.log('Fleet has been launched to target: '+this.travelTime+' weeks');
     }
 
     setArrived() {
-        // console.log('Fleet has arrived at target');
         this.locationVector = new Vector(this.endVector.x,this.endVector.y);
         this.startVector = new Vector(this.endVector.x,this.endVector.y);
         this.location = this.target;
@@ -131,9 +97,46 @@ export class Fleet {
         }
     }
 
+    addHP(hp) {
+        this.hp += hp;
+        if (this.hp > Options.maxHP * this.rank) {
+            this.hp = Options.maxHP * this.rank;
+        }
+    }
+
     damageFleet(damage) {
         this.hp -= damage;
         if (this.hp < 0) { this.hp = 0; }
+    }
+
+    xpCheck() {
+        if (this.xp >= Options.maxXP) {
+            this.xp = 0;
+            if (this.rank < Options.maxRank) {
+                this.rank++;
+            }
+        }
+    }
+
+    tick(universe, empires, ticker) {
+        let system = universe.getAstro(this.location);
+        if ((this.hasArrived(ticker.time) && !this.isHome()) || (this.isHome() && system.empireID !== this.empireID)) {
+            this.setArrived();
+            if (system.empireID !== -1 && system.empireID !== this.empireID) {
+                this.addXP(500);
+                this.damageFleet(5);
+            } else {
+                this.addXP(100);
+                this.addHP(1);
+            }
+            if (system.empireID !== -1) {
+                empires.getEmpire(system.empireID).removeSystem(universe, system.astroID);
+            }
+            universe.captureSystem(system.astroID, this.empireID);
+
+            empires.getEmpire(this.empireID).addSystem(universe, system.astroID);
+        }
+        this.xpCheck();
     }
 
     draw(canvas, camera, time) {
@@ -144,8 +147,16 @@ export class Fleet {
         if (this.isHome()) {
             offset = 10;
         }
-        // canvas.fillRect(Math.round(canvasCoords.x-2)+offset, Math.round(canvasCoords.y-2)+offset, 5, 5, fn.getEmpireColor(this.empireID));
-        canvas.drawTriangle(Math.round(canvasCoords.x)+offset, Math.round(canvasCoords.y)+offset, fn.getEmpireColor(this.empireID));
+        let thirds = Math.floor(Options.maxRank / 3);
+        if (this.rank < thirds) {
+            canvas.drawTriangle(Math.round(canvasCoords.x)+offset, Math.round(canvasCoords.y)+offset, this.color);
+        }
+        if (this.rank >= thirds && this.rank < thirds * 2) {
+            canvas.fillRect(Math.round(canvasCoords.x-2)+offset, Math.round(canvasCoords.y-2)+offset, 5, 5, this.color);
+        }
+        if (this.rank >= thirds * 2) {
+            canvas.fillRect(Math.round(canvasCoords.x-4)+offset, Math.round(canvasCoords.y-4)+offset, 9, 9, this.color);
+        }
     }
 
     drawLines(canvas, camera) {
@@ -161,7 +172,7 @@ export class Fleet {
             Math.round(fromCanvasCoords.y),
             Math.round(toCanvasCoords.x),
             Math.round(toCanvasCoords.y),
-            fn.getEmpireColor(this.empireID)
+            this.color
         );
     }
 

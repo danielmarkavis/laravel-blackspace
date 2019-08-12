@@ -3,16 +3,18 @@ export class Canvas {
     constructor() {
         this.element = null;
         this.canvas = null;
+        this.buffer = null;
         this.width = 1280;
         this.height = 720;
         this.ctx = null;
+        this.ctb = null;
         this.center = this.getCanvasCenter();
         this.layers = []; // Fleet lines -> planets -> ships
         this.drawTick = 10;
     }
 
     clear() {
-        this.fillRect(0, 0, this.canvas.width, this.canvas.height, 'black');
+        this.ctb.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
     setup(element, resolution) {
@@ -20,14 +22,17 @@ export class Canvas {
         this.height = resolution.height || 720;
         if (element !== null) {
             this.canvas = document.getElementById(element);
+            this.buffer = new OffscreenCanvas(this.width, this.height);
         } else {
             this.canvas = new OffscreenCanvas(this.width, this.height);
+            this.buffer = new OffscreenCanvas(this.width, this.height);
         }
         this.canvas.width = this.width;
         this.canvas.height = this.height;
         this.center = this.getCanvasCenter();
 
         this.ctx = this.canvas.getContext("2d");
+        this.ctb = this.buffer.getContext("2d");
         this.clear();
     }
 
@@ -39,30 +44,30 @@ export class Canvas {
     }
 
     flip() {
-        this.canvas.draw();
+        this.ctx.putImageData(this.ctb.getImageData(0,0,this.width,this.height), 0, 0);
     }
 
     fillRect(x, y, w, h, color) {
         if (!this.isReady()) {
             return false;
         }
-        this.ctx.fillStyle = color;
-        this.ctx.fillRect(x, y, w, h);
+        this.ctb.fillStyle = color;
+        this.ctb.fillRect(x, y, w, h);
     }
 
     drawCircle(x, y, radius, fill, stroke) {
         if (!this.isReady()) {
             return false;
         }
-        this.ctx.fillStyle = fill;
-        this.ctx.strokeStyle = stroke;
-        this.ctx.beginPath();
-        this.ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-        this.ctx.fill();
+        this.ctb.fillStyle = fill;
+        this.ctb.strokeStyle = stroke;
+        this.ctb.beginPath();
+        this.ctb.arc(x, y, radius, 0, 2 * Math.PI, false);
+        this.ctb.fill();
         if (stroke) {
-            this.ctx.lineWidth = 1;
-            this.ctx.strokeStyle = stroke;
-            this.ctx.stroke();
+            this.ctb.lineWidth = 1;
+            this.ctb.strokeStyle = stroke;
+            this.ctb.stroke();
         }
     }
 
@@ -70,46 +75,46 @@ export class Canvas {
         if (!this.isReady()) {
             return false;
         }
-        this.ctx.strokeStyle = color;
-        this.ctx.beginPath();
-        this.ctx.moveTo(sx, sy);
-        this.ctx.lineTo(ex, ey);
-        this.ctx.stroke();
+        this.ctb.strokeStyle = color;
+        this.ctb.beginPath();
+        this.ctb.moveTo(sx, sy);
+        this.ctb.lineTo(ex, ey);
+        this.ctb.stroke();
     }
 
     drawTriangle(x, y, color) {
         if (!this.isReady()) {
             return false;
         }
-        this.ctx.strokeStyle = color;
-        this.ctx.fillStyle = color;
-        this.ctx.beginPath();
-        this.ctx.moveTo(x+2, y-2);
-        this.ctx.lineTo(x-2, y+4);
-        this.ctx.lineTo(x+6, y+4);
-        this.ctx.closePath();
-        this.ctx.fill();
-        this.ctx.stroke();
+        this.ctb.strokeStyle = color;
+        this.ctb.fillStyle = color;
+        this.ctb.beginPath();
+        this.ctb.moveTo(x + 2, y - 2);
+        this.ctb.lineTo(x - 2, y + 4);
+        this.ctb.lineTo(x + 6, y + 4);
+        this.ctb.closePath();
+        this.ctb.fill();
+        this.ctb.stroke();
     }
 
     drawText(x, y, str, color) {
-        this.ctx.font = "12px Arial";
+        this.ctb.font = "12px Arial";
         // this.ctx.strokeStyle = color;
-        this.ctx.fillStyle = color;
+        this.ctb.fillStyle = color;
 
-        this.ctx.fillText(str, x, y);
+        this.ctb.fillText(str, x, y);
     }
 
     drawImage(x, y, image) {
-        this.ctx.drawImage(image, x, y);
+        this.ctb.drawImage(image, x, y);
     }
 
     getData(x, y) {
-        return this.ctx.getImageData(x, y, 1, 1).data;
+        return this.ctb.getImageData(x, y, 1, 1).data;
     }
 
     isReady() {
-        if (!this.ctx) {
+        if (!this.ctb) {
             console.log('Canvas not ready');
             return false;
         }
@@ -130,19 +135,19 @@ export class Canvas {
         };
         increment = 2 * Math.PI / 60/*steps per rotation*/;
         theta = sAngle;
-        this.ctx.beginPath();
-        this.ctx.moveTo(center.x, center.y);
+        this.ctb.beginPath();
+        this.ctb.moveTo(center.x, center.y);
         while (theta <= eAngle + increment) {
             progress = (theta - sAngle) / (eAngle - sAngle);
             tempTheta = options.direction ? theta : -1 * (theta - 2 * options.angle);
             newX = options.radius * Math.cos(tempTheta) * progress;
             newY = options.radius * Math.sin(tempTheta) * progress;
             theta += increment;
-            this.ctx.lineTo(center.x + newX, center.y + newY);
+            this.ctb.lineTo(center.x + newX, center.y + newY);
         }
-        this.ctx.strokeStyle = options.lineColor || '#FFFFFF';
-        this.ctx.lineWidth = options.lineWidth || 30;
-        this.ctx.stroke();
+        this.ctb.strokeStyle = options.lineColor || '#FFFFFF';
+        this.ctb.lineWidth = options.lineWidth || 30;
+        this.ctb.stroke();
     };
 
 }

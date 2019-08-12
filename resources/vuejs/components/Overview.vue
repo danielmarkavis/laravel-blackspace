@@ -4,7 +4,7 @@
         <div class="container-fluid">
             <div class="row">
                 <div class="col-12 text-center pt-5">
-                    <canvas id="my-canvas"></canvas>
+                    <canvas id="my-canvas" style="background:black"></canvas>
                 </div>
             </div>
         </div>
@@ -39,7 +39,6 @@
                 <div v-if="game" class="col-3 game mb-3">
                     <button class="btn btn-primary" @click="game.centerPlanet()">Star 1</button>
                     <button class="btn btn-primary" @click="game.centerScreen()">Center</button>
-                    <button class="btn btn-primary" @click="game.testFleetLaunch()">Launch</button>
                     <button class="btn btn-primary" @click="game.render()">Force Render</button>
                     <button class="btn btn-primary" @click="game.createEmpire()">New Empire</button>
                     <button class="btn btn-primary" @click="game.showEmpires()">Show Empires</button>

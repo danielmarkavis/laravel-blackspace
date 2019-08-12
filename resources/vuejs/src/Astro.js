@@ -43,4 +43,9 @@ export class Astro {
     setOwner(empireID) {
         this.empireID = empireID;
     }
+
+    damagePlanet(value) {
+        this.hp -= value;
+        return (this.hp <= 0);
+    }
 }

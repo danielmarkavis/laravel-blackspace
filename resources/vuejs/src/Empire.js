@@ -11,7 +11,7 @@ export class Empire {
         this.astroCount = 0;
         this.fleets = [];
         this.homePlanet = homePlanet;
-        this.bot = new Bot(empireID,homePlanet);
+        this.bot = new Bot(empireID, homePlanet);
         this.currentTargets = [];
         this.credits = Options.startCredits;
         this.alive = true;
@@ -22,19 +22,9 @@ export class Empire {
         this.fleets.push(fleetID);
     }
 
-    xpCheck(universe, fleets, fleet) {
-        if (fleet.xp >= Options.maxXP) {
-            fleet.xp = 0;
-            if (fleet.rank < Options.maxRank) {
-                fleet.rank++;
-            }
-        }
-    }
-
     buyFleet(universe, fleets) {
         if (this.credits >= Options.fleetCost) {
-            if (this.fleets.length < Options.maxFleets) {
-                // let homePlanet = universe.getAstro(this.homePlanet.astroID);
+            if (this.fleets.length < Options.maxFleets || Options.maxFleets === -1) {
                 if (this.homePlanet.empireID === this.empireID) {
                     let rank = Math.floor(this.credits / Options.fleetCost);
                     if (rank > Options.maxRank) {
@@ -44,8 +34,6 @@ export class Empire {
                     this.createFleet(fleets, this.homePlanet, rank);
                 }
                 else {
-                    // console.log('Home planet Blocked'); // Move homePlanet
-                //     let system = universe.getAstro(fleet.location);
                     let rank = 1;
                     this.credits -= (Options.fleetCost * rank);
                     this.createFleet(fleets, this.homePlanet, rank);
@@ -67,13 +55,7 @@ export class Empire {
         });
     }
 
-    battleCheck(fleets, fleet, fleetID) {
-        if (fleet.hp <= 0) {
-            this.killFleet(fleets,fleetID);
-        }
-    }
-
-    getCurrentTargets() {
+    getCurrentTargets(fleets) {
         let targets = [];
         this.fleets.forEach( (fleetID) => {
             targets.push(fleetID);
@@ -85,12 +67,7 @@ export class Empire {
     checkHomePlanet(universe) {
         if (this.homePlanet.empireID !== this.empireID) {
             let newHomePlanetID = fn.rand(this.astroOwned.length-1);
-            // console.log(newHomePlanetID);
-            // console.log(this.astroOwned);
-            // console.log(this.astroOwned[newHomePlanetID]);
             this.homePlanet = universe.getAstro(this.astroOwned[newHomePlanetID]);
-            // console.log(this.homePlanet);
-            // console.log(this.name+' has moved home planet');
         }
     }
 
@@ -120,18 +97,18 @@ export class Empire {
             return this.alive;
         }
 
-        this.currentTargets = this.getCurrentTargets();
+        this.currentTargets = this.getCurrentTargets(fleets);
+
         this.fleets.forEach( (fleetID) => {
             if (fn.rand(100) < 15) {
                 let launched = this.bot.botLaunchFleet(universe, fleets, fleets.fleet[fleetID], fleetID, this.currentTargets, ticker.time);
                 if (launched) {
-                    this.currentTargets = this.getCurrentTargets();
+                    this.currentTargets = this.getCurrentTargets(fleets);
                 }
             }
-            this.xpCheck(universe, fleets, fleets.fleet[fleetID]); // Ranking the fleet up.
-            this.battleCheck(fleets, fleets.fleet[fleetID], fleetID);
         });
         this.buyFleet(universe, fleets); // Buy a fleet if enough resources.
+
         this.credits += this.astroCount;
         return this.alive;
     }

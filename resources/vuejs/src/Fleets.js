@@ -1,4 +1,5 @@
 import {Fleet} from './Fleet.js';
+import {Options} from "./Options";
 
 export class Fleets {
 
@@ -26,7 +27,6 @@ export class Fleets {
 
     removeFleet(fleetID) {
         this.totalFleets--;
-        // console.log('Nulling fleet');
         this.fleet[fleetID] = null;
     }
 
@@ -41,7 +41,6 @@ export class Fleets {
         }
         this.fleet.forEach((fleet, key) => {
             if (fleet === null) {
-                // console.log('Found Slot: '+key);
                 foundKey = key;
             }
         });
@@ -51,10 +50,21 @@ export class Fleets {
         return false;
     }
 
-    tick(universe, empires, time) {
-        this.fleet.forEach( (fleet) => {
+    healthCheck(empires, fleet, fleetID) {
+        if (fleet.hp <= 0) {
+            this.removeFleet(fleetID);
+            empires.getEmpire(fleet.empireID).removeFleet(fleetID);
+            return false;
+        }
+        return true;
+    }
+
+    tick(universe, empires, ticker) {
+        this.fleet.forEach( (fleet, fleetID) => {
             if (fleet) {
-                fleet.tick(universe, empires, time);
+                if (this.healthCheck(empires, fleet, fleetID) ) {
+                    fleet.tick(universe, empires, ticker);
+                }
             }
         });
     }

@@ -50,14 +50,13 @@ export class Game {
     setupCamera() {
         this.camera = new Camera();
         this.camera.distanceScale = Options.distanceScale;
-        this.camera.setZoom(Options.zoom);
+        this.camera.setZoom(Options.defaultZoom);
     }
 
     setupUniverse() {
         this.universe = new Universe(this.canvas.width, this.canvas.height, this.camera.distanceScale);
         this.universe.createBodies();
         this.camera.setVector(this.universe.center.x, this.universe.center.y);
-        // this.centerPlanet();
     }
 
     setupFleets() {
@@ -97,12 +96,13 @@ export class Game {
             this.drawUniverse();
             this.drawFleets();
             this.drawEmpires();
+            this.canvas.flip();
         }
     }
 
     tick(forceRender) {
         this.ticker.tick();
-        this.fleets.tick(this.universe, this.empires, this.ticker.time);
+        this.fleets.tick(this.universe, this.empires, this.ticker);
         this.empires.tick(this.universe, this.fleets, this.ticker, () => {this.victory(this.empires.alive[0])} );
         this.render(forceRender || false);
     }
@@ -181,9 +181,11 @@ export class Game {
         console.log(this.fleets);
     }
 
-    testFleetLaunch() {
-        let target = this.universe.getStar(1);
-        this.fleets.fleet[0].launchFleet(target.astroID, target, this.ticker.time);
-        this.render();
+    showAstros() {
+
+    }
+
+    showAstros() {
+
     }
 }

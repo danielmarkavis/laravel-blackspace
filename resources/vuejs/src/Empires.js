@@ -8,22 +8,15 @@ export class Empires {
         this.alive = [];
     }
 
-    createEmpires(universe, maxEmpires) {
-        let totalEmpires = maxEmpires || Options.minEmpires;
-        if (totalEmpires > Options.maxEmpires) {
-            totalEmpires = Options.maxEmpires;
-        }
-        for (let e = 0; e < totalEmpires; e++) {
+    createEmpires(universe) {
+        for (let e = 0; e < Options.minEmpires; e++) {
             let homePlanet = universe.getStar(e);
             this.createEmpire(e, homePlanet);
         }
     }
 
     createEmpire(id, homePlanet) {
-        if (this.empires.length > Options.minEmpires) {
-            Options.minEmpires++;
-        }
-        if (Options.minEmpires >= Options.maxEmpires) {
+        if (Options.minEmpires > Options.maxEmpires) {
             console.log('Max Empires Reached!');
             return false;
         }

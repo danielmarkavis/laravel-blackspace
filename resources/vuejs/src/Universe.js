@@ -18,8 +18,8 @@ export class Universe {
 
         this.galaxy = new Galaxy();
         this.galaxy.setup();
-        // this.galaxy.drawLargeDonut();
-        this.galaxy.drawSpiral();
+        this.galaxy.drawLargeDonut();
+        // this.galaxy.drawSpiral();
         // this.galaxy.drawDonut();
         // this.galaxy.drawQuadCircle();
     }
