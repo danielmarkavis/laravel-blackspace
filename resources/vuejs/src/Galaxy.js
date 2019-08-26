@@ -16,7 +16,7 @@ export class Galaxy {
         this.galaxy.setup(null, {'width': 1280, 'height': 720});
     }
 
-    drawSpiral(){
+    drawSpiral() {
         let radius = 350;
         this.galaxy.spiral({
             start: {//starting point of spiral
@@ -47,8 +47,8 @@ export class Galaxy {
 
     drawQuadCircle() {
         let radius = 150;
-        let width = Math.round(this.galaxy.width*0.25);
-        let height = Math.round(this.galaxy.height*0.25);
+        let width = Math.round(this.galaxy.width * 0.25);
+        let height = Math.round(this.galaxy.height * 0.25);
         this.galaxy.drawCircle(this.galaxy.center.x - width, this.galaxy.center.y - height, radius, '#ffffff');
         this.galaxy.drawCircle(this.galaxy.center.x - width, this.galaxy.center.y + height, radius, '#ffffff');
         this.galaxy.drawCircle(this.galaxy.center.x + width, this.galaxy.center.y - height, radius, '#ffffff');
@@ -58,16 +58,17 @@ export class Galaxy {
     drawDonut() {
         let radius = 350;
         this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius, '#ffffff');
-        this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius-150, '#000000');
+        this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius - 150, '#000000');
         this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, 50, '#ff0000');
     }
 
     drawLargeDonut() {
         let radius = 650;
         this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius, '#ffffff');
-        this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius-150, '#000000');
+        this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, radius - 150, '#000000');
         this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, 50, '#ff0000');
     }
+
 
     selectCoords() {
         let found = false;
@@ -79,7 +80,7 @@ export class Galaxy {
             let p = this.galaxy.getData(x, y);
             let hex = "#" + ("000000" + fn.rgbToHex(p[0], p[1], p[2])).slice(-6);
             let chance = 2;
-            switch(hex) {
+            switch (hex) {
                 case '#ffffff' :
                     chance = 90;
                     break;
@@ -87,7 +88,7 @@ export class Galaxy {
                     chance = 20;
                     break;
             }
-            let rand = fn.rand(100)+1;
+            let rand = fn.rand(100) + 1;
             if (rand < chance) {
                 // console.log();
                 found = true;
