@@ -8,9 +8,10 @@ export class Bot {
 
     /**
      *
+     * @param fleets
      * @param empireTargets
      * @param astroID
-     * @returns {boolean}
+     * @returns {{found: boolean, arrival: null}}
      */
     botHasTargeted(fleets, empireTargets, astroID) {
         let target = {'found': false, 'arrival': null};
