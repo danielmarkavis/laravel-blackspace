@@ -19,6 +19,12 @@ export let Options = {
     'maxZoom': 10000,
 
     'startCredits' : 0,
+
     'color': ['#00D2BE', '#DC0000', '#1E41FF', '#FF8700', '#FFF500', '#F596C8', '#469BFF', '#9B0000', '#F0D787', '#FFFFFF', '#004225'],
     'colorName': ['Mercedes', 'Ferrari', 'Red Bull', 'McLaren', 'Renault', 'Racing Point', 'Toro Rosso', 'Alfa Romeo', 'Haas', 'Williams', 'Lotus'],
+
+    'render': {
+       'fleetLines': true,
+       'fleets': true,
+    } ,
 };

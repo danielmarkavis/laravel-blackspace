@@ -62,9 +62,8 @@ export class Fleets {
     tick(universe, empires, ticker) {
         this.fleet.forEach( (fleet, fleetID) => {
             if (fleet) {
-                if (this.healthCheck(empires, fleet, fleetID) ) {
-                    fleet.tick(universe, empires, ticker);
-                }
+                fleet.tick(universe, empires, ticker);
+                this.healthCheck(empires, fleet, fleetID)
             }
         });
     }

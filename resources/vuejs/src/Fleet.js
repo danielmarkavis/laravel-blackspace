@@ -25,7 +25,7 @@ export class Fleet {
         this.rank = rank || 1;
         this.launchDate = 0;
         this.travelTime = 0;
-        this.path = fn.rand(3)+1;
+        this.path = fn.rand(2)+1;
         this.color = fn.getEmpireColor(empireID);
     }
 

@@ -69,6 +69,17 @@ export class Galaxy {
         this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, 50, '#ff0000');
     }
 
+    drawSector() {
+        this.galaxy.fillRect(0,0,this.galaxy.width,this.galaxy.height, '#ffffff');
+    }
+
+    drawCross() {
+        let centerLeft = (this.galaxy.width / 2);
+        let centerUp = (this.galaxy.height / 2);
+        this.galaxy.fillRect(0,centerUp-50,this.galaxy.width,100, '#ffffff');
+        this.galaxy.fillRect(centerLeft-50,0,100,this.galaxy.height, '#ffffff');
+    }
+
     selectCoords() {
         let found = false;
         let x = null;

@@ -85,8 +85,8 @@ export class Game {
         this.empires.draw(this.canvas, this.universe, this.fleets);
     }
 
-    drawCamera() {
-        this.camera.draw(this.canvas);
+    drawUI() {
+        this.canvas.drawText(this.canvas.width - 50, 10, this.ticker.time, 'white');
     }
 
     render(forceRender) {
@@ -96,6 +96,7 @@ export class Game {
             this.drawUniverse();
             this.drawFleets();
             this.drawEmpires();
+            this.drawUI();
             this.canvas.flip();
         }
     }

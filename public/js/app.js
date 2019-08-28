@@ -42043,7 +42043,7 @@ function () {
     this.rank = rank || 1;
     this.launchDate = 0;
     this.travelTime = 0;
-    this.path = _Functions_js__WEBPACK_IMPORTED_MODULE_0__["fn"].rand(3) + 1;
+    this.path = _Functions_js__WEBPACK_IMPORTED_MODULE_0__["fn"].rand(2) + 1;
     this.color = _Functions_js__WEBPACK_IMPORTED_MODULE_0__["fn"].getEmpireColor(empireID);
   }
 
@@ -42324,9 +42324,9 @@ function () {
 
       this.fleet.forEach(function (fleet, fleetID) {
         if (fleet) {
-          if (_this.healthCheck(empires, fleet, fleetID)) {
-            fleet.tick(universe, empires, ticker);
-          }
+          fleet.tick(universe, empires, ticker);
+
+          _this.healthCheck(empires, fleet, fleetID);
         }
       });
     }
@@ -42578,6 +42578,19 @@ function () {
       this.galaxy.drawCircle(this.galaxy.center.x, this.galaxy.center.y, 50, '#ff0000');
     }
   }, {
+    key: "drawSector",
+    value: function drawSector() {
+      this.galaxy.fillRect(0, 0, this.galaxy.width, this.galaxy.height, '#ffffff');
+    }
+  }, {
+    key: "drawCross",
+    value: function drawCross() {
+      var centerLeft = this.galaxy.width / 2;
+      var centerUp = this.galaxy.height / 2;
+      this.galaxy.fillRect(0, centerUp - 50, this.galaxy.width, 100, '#ffffff');
+      this.galaxy.fillRect(centerLeft - 50, 0, 100, this.galaxy.height, '#ffffff');
+    }
+  }, {
     key: "selectCoords",
     value: function selectCoords() {
       var found = false;
@@ -42751,9 +42764,9 @@ function () {
       this.empires.draw(this.canvas, this.universe, this.fleets);
     }
   }, {
-    key: "drawCamera",
-    value: function drawCamera() {
-      this.camera.draw(this.canvas);
+    key: "drawUI",
+    value: function drawUI() {
+      this.canvas.drawText(this.canvas.width - 50, 10, this.ticker.time, 'white');
     }
   }, {
     key: "render",
@@ -42764,6 +42777,7 @@ function () {
         this.drawUniverse();
         this.drawFleets();
         this.drawEmpires();
+        this.drawUI();
         this.canvas.flip();
       }
     }
@@ -42912,7 +42926,11 @@ var Options = {
   'maxZoom': 10000,
   'startCredits': 0,
   'color': ['#00D2BE', '#DC0000', '#1E41FF', '#FF8700', '#FFF500', '#F596C8', '#469BFF', '#9B0000', '#F0D787', '#FFFFFF', '#004225'],
-  'colorName': ['Mercedes', 'Ferrari', 'Red Bull', 'McLaren', 'Renault', 'Racing Point', 'Toro Rosso', 'Alfa Romeo', 'Haas', 'Williams', 'Lotus']
+  'colorName': ['Mercedes', 'Ferrari', 'Red Bull', 'McLaren', 'Renault', 'Racing Point', 'Toro Rosso', 'Alfa Romeo', 'Haas', 'Williams', 'Lotus'],
+  'render': {
+    'fleetLines': true,
+    'fleets': true
+  }
 };
 
 /***/ }),
@@ -43040,10 +43058,13 @@ function () {
       'y': this.height / 2
     };
     this.galaxy = new _Galaxy_js__WEBPACK_IMPORTED_MODULE_3__["Galaxy"]();
-    this.galaxy.setup();
-    this.galaxy.drawLargeDonut(); // this.galaxy.drawSpiral();
+    this.galaxy.setup(); // this.galaxy.drawLargeDonut();
+    // this.galaxy.drawSpiral();
     // this.galaxy.drawDonut();
     // this.galaxy.drawQuadCircle();
+    // this.galaxy.drawSector();
+
+    this.galaxy.drawCross();
   }
   /**
    *
@@ -43375,8 +43396,8 @@ function () {
 /*! no static exports found */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(/*! D:\Wamp.NET\sites\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
-module.exports = __webpack_require__(/*! D:\Wamp.NET\sites\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
+__webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\vuejs\app.js */"./resources/vuejs/app.js");
+module.exports = __webpack_require__(/*! E:\wamp64\www\Laravel\other\laravel-blackspace\resources\sass\app.scss */"./resources/sass/app.scss");
 
 
 /***/ })
