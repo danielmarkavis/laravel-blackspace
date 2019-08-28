@@ -5,7 +5,7 @@
         <div class="row">
             <div class="col-12 text-center my-5">
                 <h1>Blackspace!</h1>
-                <h4><a href="{{route('overview')}}">New Game</a></h4>
+                <h4><a href="{{route('overview')}}" class="btn btn-primary">New Game</a></h4>
             </div>
         </div>
     </div>

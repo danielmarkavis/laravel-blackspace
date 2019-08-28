@@ -19,13 +19,13 @@ export class Universe {
         this.galaxy = new Galaxy();
         this.galaxy.setup();
         // this.galaxy.drawLargeDonut();
-        // this.galaxy.drawSpiral();
+        this.galaxy.drawSpiral();
         // this.galaxy.drawDonut();
         // this.galaxy.drawQuadCircle();
         // this.galaxy.drawSector();
-        this.galaxy.drawCross();
+        // this.galaxy.drawCross();
+        // this.galaxy.drawClusters();
     }
-
     /**
      *
      */
@@ -56,7 +56,7 @@ export class Universe {
     createStar(systemID) {
         let star = new Astro('Star ' + systemID);
         star.setAsStar();
-        let vector = this.galaxy.selectCoords()
+        let vector = this.galaxy.selectCoords();
         star.vector.setVector( vector.x * Options.distanceScale, vector.y * Options.distanceScale );
         // star.vector.setVector(fn.rand(this.width), fn.rand(this.height));
         star.name = this.systemNameGenerator();
@@ -191,6 +191,8 @@ export class Universe {
                 canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(body.radius * (camera.zoom / 10), body.radius+2), 'yellow');
                 canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(body.radius+5 * (camera.zoom / 10), body.radius+5), 'transparent', fn.getEmpireColor(body.empireID));
             }
+
+            // canvas.canvas = this.galaxy.galaxy;
             // if ((camera.zoom > 1000 && body.type === 'planet')) {
             //     canvas.drawCircle(coords.x, coords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
                 // canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius * (camera.zoom / 10), this.radius), 'green');

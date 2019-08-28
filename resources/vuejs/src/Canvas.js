@@ -130,8 +130,8 @@ export class Canvas {
         sAngle = Math.PI + options.angle;
         eAngle = sAngle + Math.PI * 2 * options.number;
         center = {
-            x: (options.start.x) + Math.cos(options.angle) * options.radius,
-            y: (options.start.y) + Math.sin(options.angle) * options.radius
+            x: (options.start.x),// + Math.cos(options.angle) * options.radius,
+            y: (options.start.y),// + Math.sin(options.angle) * options.radius
         };
         increment = 2 * Math.PI / 60/*steps per rotation*/;
         theta = sAngle;

@@ -41242,6 +41242,9 @@ function () {
     this.radius = 5;
     this.orbitting = 0;
     this.nodes = [];
+    this.resources = {
+      'credits': 0
+    };
 
     if (orbit > 0) {
       this.orbit.distance = 7 * ((orbit + 1) * 2);
@@ -41315,9 +41318,10 @@ function () {
   }
   /**
    *
+   * @param fleets
    * @param empireTargets
    * @param astroID
-   * @returns {boolean}
+   * @returns {{found: boolean, arrival: null}}
    */
 
 
@@ -41697,8 +41701,10 @@ function () {
       sAngle = Math.PI + options.angle;
       eAngle = sAngle + Math.PI * 2 * options.number;
       center = {
-        x: options.start.x + Math.cos(options.angle) * options.radius,
-        y: options.start.y + Math.sin(options.angle) * options.radius
+        x: options.start.x,
+        // + Math.cos(options.angle) * options.radius,
+        y: options.start.y // + Math.sin(options.angle) * options.radius
+
       };
       increment = 2 * Math.PI / 60
       /*steps per rotation*/
@@ -42517,38 +42523,63 @@ function () {
     key: "drawSpiral",
     value: function drawSpiral() {
       var radius = 350;
-      this.galaxy.spiral({
-        start: {
-          //starting point of spiral
-          x: this.galaxy.center.x - 350,
-          y: this.galaxy.center.y - 225
-        },
-        angle: 30 * (Math.PI / 180),
-        //angle from starting point
-        direction: true,
-        radius: radius,
-        //radius from starting point in direction of angle
-        number: 2,
-        // number of circles
-        lineWidth: 80,
-        lineColor: '#FF0000'
-      });
-      this.galaxy.spiral({
-        start: {
-          //starting point of spiral
-          x: this.galaxy.center.x - 350,
-          y: this.galaxy.center.y - 225
-        },
-        angle: 30 * (Math.PI / 180),
-        //angle from starting point
-        direction: true,
-        radius: radius,
-        //radius from starting point in direction of angle
-        number: 2,
-        // number of circles
-        lineWidth: 40,
-        lineColor: '#FFFFFF'
-      });
+      var maxArms = 3;
+      var angle = 360 / maxArms;
+      var rotations = 1;
+      var width = 40;
+      var color = '#FF0000';
+
+      for (var arms = 0; arms < maxArms; arms++) {
+        this.galaxy.spiral({
+          start: {
+            x: this.galaxy.center.x,
+            y: this.galaxy.center.y
+          },
+          angle: angle * arms * (Math.PI / 180),
+          //angle from starting point
+          direction: true,
+          radius: radius,
+          //radius from starting point in direction of angle
+          number: rotations,
+          // number of circles
+          lineWidth: width,
+          lineColor: color
+        });
+      }
+
+      width = 40;
+      color = '#FFFFFF';
+
+      for (var _arms = 0; _arms < maxArms; _arms++) {
+        this.galaxy.spiral({
+          start: {
+            x: this.galaxy.center.x,
+            y: this.galaxy.center.y
+          },
+          angle: angle * _arms * (Math.PI / 180),
+          //angle from starting point
+          direction: true,
+          radius: radius,
+          //radius from starting point in direction of angle
+          number: rotations,
+          // number of circles
+          lineWidth: width,
+          lineColor: color
+        });
+      }
+    }
+  }, {
+    key: "drawClusters",
+    value: function drawClusters() {
+      var clusters = 10;
+      var radius = 30; // this.galaxy.fillRect(0, 0, this.galaxy.width, this.galaxy.height, '#000000');
+
+      for (var cluster = 0; cluster < clusters; cluster++) {
+        var pX = _Functions__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(this.galaxy.width);
+        var pY = _Functions__WEBPACK_IMPORTED_MODULE_2__["fn"].rand(this.galaxy.height); // do something with pX, pY, and pZ
+
+        this.galaxy.drawCircle(pX, pY, radius, '#FFFFFF');
+      }
     }
   }, {
     key: "drawQuadCircle",
@@ -43059,12 +43090,12 @@ function () {
     };
     this.galaxy = new _Galaxy_js__WEBPACK_IMPORTED_MODULE_3__["Galaxy"]();
     this.galaxy.setup(); // this.galaxy.drawLargeDonut();
-    // this.galaxy.drawSpiral();
-    // this.galaxy.drawDonut();
+
+    this.galaxy.drawSpiral(); // this.galaxy.drawDonut();
     // this.galaxy.drawQuadCircle();
     // this.galaxy.drawSector();
-
-    this.galaxy.drawCross();
+    // this.galaxy.drawCross();
+    // this.galaxy.drawClusters();
   }
   /**
    *
@@ -43267,7 +43298,8 @@ function () {
         if (body.type === 'star') {
           canvas.drawCircle(canvasCoords.x, canvasCoords.y, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].max(body.radius * (camera.zoom / 10), body.radius + 2), 'yellow');
           canvas.drawCircle(canvasCoords.x, canvasCoords.y, _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].max(body.radius + 5 * (camera.zoom / 10), body.radius + 5), 'transparent', _Functions_js__WEBPACK_IMPORTED_MODULE_1__["fn"].getEmpireColor(body.empireID));
-        } // if ((camera.zoom > 1000 && body.type === 'planet')) {
+        } // canvas.canvas = this.galaxy.galaxy;
+        // if ((camera.zoom > 1000 && body.type === 'planet')) {
         //     canvas.drawCircle(coords.x, coords.y, this.orbit.distance*(camera.zoom/10), 'transparent', 'grey' );
         // canvas.drawCircle(canvasCoords.x, canvasCoords.y, fn.max(this.radius * (camera.zoom / 10), this.radius), 'green');
         // }

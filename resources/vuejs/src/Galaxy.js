@@ -18,31 +18,56 @@ export class Galaxy {
 
     drawSpiral() {
         let radius = 350;
-        this.galaxy.spiral({
-            start: {//starting point of spiral
-                x: (this.galaxy.center.x - 350),
-                y: (this.galaxy.center.y - 225)
-            },
-            angle: 30 * (Math.PI / 180), //angle from starting point
-            direction: true,
-            radius: radius, //radius from starting point in direction of angle
-            number: 2, // number of circles
-            lineWidth: 80,
-            lineColor: '#FF0000',
-        });
+        let maxArms = 3;
+        let angle = 360 / maxArms;
+        let rotations = 1;
+        let width = 40;
+        let color = '#FF0000';
+        for (let arms = 0; arms < maxArms; arms++) {
+            this.galaxy.spiral({
+                start: {
+                    x: (this.galaxy.center.x),
+                    y: (this.galaxy.center.y)
+                },
+                angle: (angle * arms) * (Math.PI / 180), //angle from starting point
+                direction: true,
+                radius: radius, //radius from starting point in direction of angle
+                number: rotations, // number of circles
+                lineWidth: width,
+                lineColor: color,
+            });
+        }
+        width = 40;
+        color = '#FFFFFF';
+        for (let arms = 0; arms < maxArms; arms++) {
+            this.galaxy.spiral({
+                start: {
+                    x: (this.galaxy.center.x),
+                    y: (this.galaxy.center.y)
+                },
+                angle: (angle * arms) * (Math.PI / 180), //angle from starting point
+                direction: true,
+                radius: radius, //radius from starting point in direction of angle
+                number: rotations, // number of circles
+                lineWidth: width,
+                lineColor: color,
+            });
+        }
+    }
 
-        this.galaxy.spiral({
-            start: {//starting point of spiral
-                x: this.galaxy.center.x - 350,
-                y: this.galaxy.center.y - 225
-            },
-            angle: 30 * (Math.PI / 180), //angle from starting point
-            direction: true,
-            radius: radius, //radius from starting point in direction of angle
-            number: 2, // number of circles
-            lineWidth: 40,
-            lineColor: '#FFFFFF',
-        });
+    drawClusters() {
+        let clusters = 10;
+        let radius = 30;
+
+        // this.galaxy.fillRect(0, 0, this.galaxy.width, this.galaxy.height, '#000000');
+
+        for (let cluster = 0; cluster < clusters; cluster++) {
+            let pX = fn.rand(this.galaxy.width);
+            let pY = fn.rand(this.galaxy.height);
+
+                // do something with pX, pY, and pZ
+            this.galaxy.drawCircle(pX, pY, radius, '#FFFFFF');
+        }
     }
 
     drawQuadCircle() {
@@ -71,14 +96,14 @@ export class Galaxy {
 
 
     drawSector() {
-        this.galaxy.fillRect(0,0,this.galaxy.width,this.galaxy.height, '#ffffff');
+        this.galaxy.fillRect(0, 0, this.galaxy.width, this.galaxy.height, '#ffffff');
     }
 
     drawCross() {
         let centerLeft = (this.galaxy.width / 2);
         let centerUp = (this.galaxy.height / 2);
-        this.galaxy.fillRect(0,centerUp-50,this.galaxy.width,100, '#ffffff');
-        this.galaxy.fillRect(centerLeft-50,0,100,this.galaxy.height, '#ffffff');
+        this.galaxy.fillRect(0, centerUp - 50, this.galaxy.width, 100, '#ffffff');
+        this.galaxy.fillRect(centerLeft - 50, 0, 100, this.galaxy.height, '#ffffff');
     }
 
     selectCoords() {
