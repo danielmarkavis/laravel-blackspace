@@ -18,6 +18,9 @@ export class Astro {
         this.radius = 5;
         this.orbitting = 0;
         this.nodes = [];
+        this.resources = {
+            'credits': 0,
+        };
 
         if (orbit > 0) {
             this.orbit.distance = 7 * ((orbit + 1) * 2);
