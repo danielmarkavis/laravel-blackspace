@@ -7,7 +7,7 @@ export let Options = {
     'maxOrbits' : 20,
 
     'fleetCost': 100000,
-    'maxFleets': 50,
+    'maxFleets': 10,
     'maxXP': 1000,
     'maxHP': 1000,
     'maxRank': 3,
